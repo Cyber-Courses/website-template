@@ -262,14 +262,34 @@ function lintFile(file: string): Finding[] {
     }
   }
 
-  // 2. Description length sanity (Google truncates ~155 chars).
-  if (typeof fm.description === "string" && fm.description.length > 200) {
+  // 2. Title length: titles past ~60 chars get truncated in the SERP.
+  if (typeof fm.title === "string" && fm.title.length > 60) {
     findings.push({
       file,
       severity: "warn",
-      rule: "description-length",
-      message: `frontmatter.description is ${fm.description.length} chars; Google truncates around 155–160`,
+      rule: "title-length",
+      message: `frontmatter.title is ${fm.title.length} chars; Google truncates titles around 60`,
     });
+  }
+
+  // 3. Description length sanity (Google shows ~50–160 chars).
+  if (typeof fm.description === "string") {
+    const len = fm.description.length;
+    if (len > 200) {
+      findings.push({
+        file,
+        severity: "warn",
+        rule: "description-length",
+        message: `frontmatter.description is ${len} chars; Google truncates around 155–160`,
+      });
+    } else if (len < 50) {
+      findings.push({
+        file,
+        severity: "warn",
+        rule: "description-length",
+        message: `frontmatter.description is only ${len} chars; aim for 50–160 to fill the SERP snippet`,
+      });
+    }
   }
 
   // 3. Images need alt text (Google + a11y) and a src.

@@ -42,7 +42,9 @@ export async function generateMetadata({
       canonical: url,
       languages: hreflangFor(siteConfig.url, `/blog/page/${n}`),
     },
-    robots: { index: true, follow: true },
+    // Paginated archives (page 2+) duplicate the post listing. Keep them
+    // crawlable but out of the index so they don't compete with /blog.
+    robots: { index: false, follow: true },
   };
 }
 

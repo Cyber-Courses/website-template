@@ -9,9 +9,17 @@
     "sitemapTitle": "Mapa del sitio",
     "sitemapDescription": "Todas las páginas del sitio."
   },
-  "nav": { "home": "Inicio", "blog": "Blog", "search": "Búsqueda" },
+  "nav": {
+    "home": "Inicio",
+    "blog": "Blog",
+    "search": "Búsqueda"
+  },
   "toggleTheme": "Cambiar tema",
-  "footer": { "rights": "Todos los derechos reservados.", "sitemap": "Mapa del sitio", "rss": "RSS" },
+  "footer": {
+    "rights": "Todos los derechos reservados.",
+    "sitemap": "Mapa del sitio",
+    "rss": "RSS"
+  },
   "blog": {
     "tableOfContents": "En esta página",
     "relatedArticles": "Artículos relacionados",
@@ -20,6 +28,8 @@
     "publishedOn": "Publicado el",
     "updatedOn": "Actualizado el",
     "byAuthor": "por",
+    "writtenBy": "Escrito por",
+    "estReadingTime": "Tiempo de lectura estimado",
     "tags": "Etiquetas",
     "share": "Compartir",
     "noPosts": "Aún no hay artículos.",
@@ -27,9 +37,18 @@
     "next": "Siguiente",
     "page": "Página"
   },
-  "tag": { "title": "Artículos etiquetados", "back": "Volver a los artículos" },
-  "search": { "placeholder": "Buscar artículos…", "noResults": "Sin resultados." },
-  "notFound": { "title": "Página no encontrada", "cta": "Volver al inicio" },
+  "tag": {
+    "title": "Artículos etiquetados",
+    "back": "Volver a los artículos"
+  },
+  "search": {
+    "placeholder": "Buscar artículos…",
+    "noResults": "Sin resultados."
+  },
+  "notFound": {
+    "title": "Página no encontrada",
+    "cta": "Volver al inicio"
+  },
   "home": {
     "heading": "Una plantilla Next.js centrada en SEO.",
     "subheading": "Por defecto shadcn. @next-md-blog/core. Multilingüe desde el principio.",

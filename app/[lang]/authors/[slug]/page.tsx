@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { slugifyAuthor, type Author } from "@next-md-blog/core";
+import { slugifyAuthor } from "@next-md-blog/core";
 
 import { PostCard } from "@/components/post-card";
 import { Breadcrumbs } from "@/components/breadcrumbs";
-import { PersonJsonLd } from "@/components/seo/person-jsonld";
+import { PersonJsonLd, type RichAuthor } from "@/components/seo/person-jsonld";
 import { CollectionJsonLd } from "@/components/seo/collection-jsonld";
-import { blog, site } from "@/next-md-blog.config";
+import { blog } from "@/next-md-blog.config";
 import { siteConfig } from "@/site.config";
 import { LOCALES, hreflangFor, type Locale } from "@/lib/i18n";
 import { getDictionary, hasLocale } from "../../dictionaries";
@@ -15,8 +15,8 @@ import { getDictionary, hasLocale } from "../../dictionaries";
 type Params = { lang: string; slug: string };
 
 /** Resolve an author by slug from site.config.authors. App-specific glue. */
-function resolveAuthorBySlug(slug: string): Author | null {
-  for (const a of site.authors ?? []) {
+function resolveAuthorBySlug(slug: string): RichAuthor | null {
+  for (const a of siteConfig.authors ?? []) {
     if (slugifyAuthor(a.name) === slug) return a;
   }
   return null;
