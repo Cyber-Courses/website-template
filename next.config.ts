@@ -2,7 +2,62 @@ import type { NextConfig } from "next";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 
+/**
+ * Content-Security-Policy. Pragmatic for a template: `'unsafe-inline'` is kept
+ * for scripts/styles because Next injects inline bootstrap without a nonce
+ * (tighten with nonce-based CSP via middleware if you need it). `frame-src`
+ * lists the oEmbed iframe providers from `lib/oembed/providers.ts` — keep the
+ * two in sync. `connect-src`/`script-src` cover the optional analytics
+ * providers; trim to the one you actually use.
+ */
+const csp = {
+  "default-src": ["'self'"],
+  "base-uri": ["'self'"],
+  "object-src": ["'none'"],
+  "frame-ancestors": ["'self'"],
+  "form-action": ["'self'"],
+  "script-src": [
+    "'self'",
+    "'unsafe-inline'",
+    "https://va.vercel-scripts.com",
+    "https://plausible.io",
+    "https://*.umami.is",
+    "https://www.googletagmanager.com",
+  ],
+  "style-src": ["'self'", "'unsafe-inline'"],
+  "img-src": ["'self'", "data:", "blob:", "https:"],
+  "font-src": ["'self'", "data:"],
+  "media-src": ["'self'", "https:"],
+  "manifest-src": ["'self'"],
+  "worker-src": ["'self'", "blob:"],
+  "connect-src": [
+    "'self'",
+    "https://*.vercel-insights.com",
+    "https://plausible.io",
+    "https://*.umami.is",
+    "https://www.google-analytics.com",
+  ],
+  "frame-src": [
+    "https://www.youtube.com",
+    "https://www.youtube-nocookie.com",
+    "https://player.vimeo.com",
+    "https://open.spotify.com",
+    "https://w.soundcloud.com",
+    "https://codepen.io",
+    "https://geo.dailymotion.com",
+    "https://www.dailymotion.com",
+  ],
+  "upgrade-insecure-requests": [],
+};
+
+const cspValue = Object.entries(csp)
+  .map(([directive, sources]) =>
+    sources.length ? `${directive} ${sources.join(" ")}` : directive,
+  )
+  .join("; ");
+
 const securityHeaders = [
+  { key: "Content-Security-Policy", value: cspValue },
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "X-Frame-Options", value: "SAMEORIGIN" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },

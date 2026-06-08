@@ -28,6 +28,14 @@ Edit `site.config.ts` to set your site name, URL, social handles, and analytics 
 
 The frontmatter recognized by `generateBlogPostMetadata` is documented inline in the file. The fields that have the most SEO impact are `title`, `description`, `date`, `updated`, `tags`, `image`, and `alternateLanguages`.
 
+## Rich embeds
+
+Paste a bare URL on its own line and it renders as a rich oEmbed — no shortcode, no plugin:
+
+https://www.youtube.com/watch?v=dQw4w9WgXcQ
+
+Known providers (YouTube, Vimeo, Spotify, …) embed inline; others fall back to a link card, and unrecognized URLs stay plain links.
+
 ## What's next
 
 Open a few posts, view source, and confirm:

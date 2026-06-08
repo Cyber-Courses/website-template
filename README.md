@@ -11,6 +11,10 @@ A Next.js 16 / React 19 starter built for SEO out of the box, using only shadcn 
 | | Canonical URLs (locale-aware) | `metadata.alternates.canonical` |
 | | Robots meta + per-post `noindex`/`nofollow` | `metadata.robots`, frontmatter |
 | | Open Graph + Twitter Card tags | `metadata.openGraph` / `metadata.twitter` |
+| | Yoast-parity robots previews (`max-image-preview:large`, `max-snippet:-1`, `max-video-preview:-1`) | `lib/seo.ts` `previewRobots()` |
+| | Yoast-style `twitter:label1/2` (author + est. reading time) | `lib/seo.ts` `articleTwitterLabels()` |
+| | oEmbed provider endpoint + `<link rel="alternate" type="application/json+oembed">` discovery | `app/oembed/route.ts`, `lib/oembed/resolve.ts` |
+| | oEmbed consumer — bare URLs → rich embeds (YouTube, Vimeo, Spotify, …) | `components/markdown/{p,embed}.tsx`, `lib/oembed/*` |
 | | Dynamic OG image per post (year-long cache) | `app/[lang]/blog/[slug]/opengraph-image.tsx` |
 | | Hreflang on every translated page | sitemap + per-page `alternates.languages` |
 | | JSON-LD: Organization + BlogPosting + Breadcrumb (`@graph`) | `generateBlogPostSchemaGraph` |
@@ -19,6 +23,14 @@ A Next.js 16 / React 19 starter built for SEO out of the box, using only shadcn 
 | | JSON-LD: Person (author pages) | `components/seo/person-jsonld.tsx` |
 | | JSON-LD: FAQPage helper | `components/seo/faq-jsonld.tsx` |
 | | JSON-LD: Speakable on posts | `[slug]/page.tsx` (patches the post graph) |
+| | JSON-LD: VideoObject for embedded videos | `lib/oembed/video-schema.ts` |
+| | Author E-E-A-T (`jobTitle`, `knowsAbout`, merged `sameAs`) | `components/seo/person-jsonld.tsx`, `site.config.ts` |
+| | `noindex,follow` on search + paginated archives | `search/page.tsx`, `blog/page/[page]/page.tsx` |
+| | Image sitemap (`<image:image>`) | `app/sitemap.ts` |
+| | `Content-Security-Policy` (+ embed/analytics origins) | `next.config.ts` |
+| | `apple-touch-icon` | `app/apple-icon.tsx` |
+| | `/.well-known/security.txt` (RFC 9116) | `app/.well-known/security.txt/route.ts` |
+| | CI SEO audit: canonical / JSON-LD / hreflang reciprocity + Lighthouse | `scripts/seo-audit.ts`, `.lighthouserc.json`, `.github/workflows/seo-audit.yml` |
 | | Pagination metadata | `rel="prev"/"next"` in `[lang]/blog/page/[page]/page.tsx` |
 | | Per-locale RSS feed `<link rel="alternate">` | `[lang]/layout.tsx` metadata |
 | | `llms.txt` + `llms-full.txt` (llmstxt.org spec) | `app/llms.txt/route.ts`, `app/llms-full.txt/route.ts` |
@@ -260,6 +272,26 @@ These need account hookups, external services, or deployment choices that don't 
 - **Video transcripts / news / video sitemaps** — extend `app/sitemap.ts` + add `VideoObject` JSON-LD.
 - **SERP rank tracking** — external (Ahrefs/Semrush/SerpAPI).
 - **Spam protection** — no commenting system ships; add only if needed.
+
+## oEmbed (consume + provide)
+
+Configured in `site.config.ts` under `oembed`:
+
+```ts
+oembed: {
+  enabled: true,     // consume: bare URLs in posts → rich embeds
+  maxWidth: 800,     // width hint sent to providers
+  discovery: false,  // best-effort <link> discovery for non-registry hosts (adds a build-time fetch per unknown URL)
+  provide: true,     // expose /oembed + discovery <link> tags for our own pages
+}
+```
+
+- **Consume** — a bare URL on its own line becomes a rich embed. Iframe providers (YouTube, Vimeo, Spotify, SoundCloud, CodePen, Dailymotion) embed inline; script-based ones (X, Instagram, TikTok) render a link card from metadata; everything else stays a plain link. Registry lives in `lib/oembed/providers.ts`; the fetch is cached at build time.
+- **Provide** — `GET /oembed?url=…&format=json|xml` returns a `link`-type oEmbed for any blog/glossary URL, with `Access-Control-Allow-Origin: *`. Discovery `<link>` tags are added to every post/term head via `metadata.alternates.types`.
+
+### WordPress/Yoast parity — and what's intentionally omitted
+
+The template matches the SEO-relevant head output of WordPress + Yoast (robots preview directives, OG `article:*`, `twitter:label/data`, feed + oEmbed autodiscovery, and a richer JSON-LD `@graph` than Yoast — it adds Organization, ContactPoint, Speakable, and multilingual hreflang). The following WordPress core tags are **deliberately not** replicated — they carry no SEO value and some are liabilities: `<meta name="generator">` (stack disclosure), `pingback`/`xmlrpc` (spam/DDoS vector), `RSD`/`EditURI`/`wlwmanifest` (legacy blog clients), `rel="https://api.w.org/"` REST link, and `shortlink`.
 
 ## Stack
 

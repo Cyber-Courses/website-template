@@ -6,6 +6,10 @@ import rehypeSlug from "rehype-slug";
 import { MarkdownContent, slugifySeries } from "@next-md-blog/core";
 
 import { blog } from "@/next-md-blog.config";
+import { oembedDiscoveryTypes } from "@/lib/oembed/resolve";
+import { collectVideoObjects } from "@/lib/oembed/video-schema";
+import { previewRobots, feedDiscoveryTypes, articleTwitterLabels } from "@/lib/seo";
+import { authorNamesFromFrontmatter } from "@next-md-blog/core";
 import { siteConfig } from "@/site.config";
 import { LOCALES, type Locale } from "@/lib/i18n";
 import { Breadcrumbs } from "@/components/breadcrumbs";
@@ -51,14 +55,39 @@ export async function generateMetadata({
   const languages = await blog.hreflangMap(slug, LOCALES);
   languages["x-default"] = languages.en ?? blog.url(slug, locale);
 
-  return {
-    metadataBase: new URL(siteConfig.url),
-    ...(await blog.metadata(post, {
-      locale,
-      titleTemplate: "absolute",
-      alternateLanguages: languages,
-    })),
+  const meta = await blog.metadata(post, {
+    locale,
+    titleTemplate: "absolute",
+    alternateLanguages: languages,
+  });
+
+  const url = blog.url(slug, locale);
+  const dict = await getDictionary(locale);
+
+  // Yoast parity: snippet/preview robots directives, feed + oEmbed autodiscovery
+  // alongside the canonical/hreflang alternates, and the twitter:label/data pairs.
+  meta.robots = previewRobots(post.frontmatter);
+  meta.alternates = {
+    ...meta.alternates,
+    types: {
+      ...feedDiscoveryTypes(locale),
+      ...oembedDiscoveryTypes(url),
+    },
   };
+  meta.other = {
+    ...meta.other,
+    ...articleTwitterLabels({
+      author: authorNamesFromFrontmatter(post.frontmatter)[0],
+      readingTime: post.readingTime,
+      labels: {
+        writtenBy: dict.blog.writtenBy,
+        estReadingTime: dict.blog.estReadingTime,
+        readingUnit: dict.blog.readingTime,
+      },
+    }),
+  };
+
+  return { metadataBase: new URL(siteConfig.url), ...meta };
 }
 
 function tagOverlap(a: string[], b: string[]) {
@@ -125,10 +154,20 @@ export default async function BlogPostPage({
     (typeof fm.image === "string" && fm.image) ||
     null;
 
+  // VideoObject JSON-LD for any bare-URL video embeds in the body.
+  const videoObjects = await collectVideoObjects(post.content, {
+    datePublished: date,
+    fallbackDescription:
+      typeof fm.description === "string" ? fm.description : undefined,
+  });
+
   return (
     <>
       <ReadingProgress />
       <JsonLd data={jsonLd} />
+      {videoObjects.map((v, i) => (
+        <JsonLd key={i} data={v} />
+      ))}
       {heroImage && (
         <link
           rel="preload"
