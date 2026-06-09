@@ -1,5 +1,6 @@
 import { MdImage } from "./img";
 import { MdLink } from "./a";
+import { MdParagraph } from "./p";
 import type { MarkdownComponents } from "@next-md-blog/core";
 
 /**
@@ -9,4 +10,6 @@ import type { MarkdownComponents } from "@next-md-blog/core";
 export const markdownComponents: MarkdownComponents = {
   img: MdImage as MarkdownComponents["img"],
   a: MdLink as MarkdownComponents["a"],
+  // Bare-URL paragraphs become rich oEmbeds (YouTube, Vimeo, …).
+  p: MdParagraph as MarkdownComponents["p"],
 };

@@ -30,13 +30,46 @@ function staticEntry(
   };
 }
 
+function absolute(src: string): string {
+  return /^https?:\/\//i.test(src) ? src : `${siteConfig.url}${src}`;
+}
+
+/**
+ * Map each post/term URL to its hero/OG image so the sitemap can carry
+ * `<image:image>` entries (Google Images discovery). Built once across locales.
+ */
+async function buildImageMap(): Promise<Map<string, string>> {
+  const map = new Map<string, string>();
+  for (const collection of [blog, glossary]) {
+    for (const locale of LOCALES) {
+      const docs = await collection.getAll({ locale });
+      for (const doc of docs) {
+        const fm = doc.frontmatter;
+        const image =
+          (typeof fm.ogImage === "string" && fm.ogImage) ||
+          (typeof fm.image === "string" && fm.image) ||
+          null;
+        if (image) map.set(collection.url(doc.slug, locale), absolute(image));
+      }
+    }
+  }
+  return map;
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticEntries = STATIC_PATHS.map((p) =>
     staticEntry(p, p === "" ? "daily" : "weekly", p === "" ? 1 : 0.7),
   );
-  return composeSitemap({
-    collections: [blog, glossary],
-    locales: LOCALES,
-    staticEntries,
+  const [entries, imageMap] = await Promise.all([
+    composeSitemap({
+      collections: [blog, glossary],
+      locales: LOCALES,
+      staticEntries,
+    }),
+    buildImageMap(),
+  ]);
+  return entries.map((entry) => {
+    const image = imageMap.get(entry.url);
+    return image ? { ...entry, images: [image] } : entry;
   });
 }

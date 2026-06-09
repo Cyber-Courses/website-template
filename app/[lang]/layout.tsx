@@ -5,6 +5,7 @@ import "../globals.css";
 
 import { siteConfig } from "@/site.config";
 import { LOCALES, hreflangFor, type Locale } from "@/lib/i18n";
+import { previewRobots } from "@/lib/seo";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
@@ -81,11 +82,7 @@ export async function generateMetadata({
       title: siteConfig.name,
       description: siteConfig.description,
     },
-    robots: {
-      index: true,
-      follow: true,
-      googleBot: { index: true, follow: true, "max-image-preview": "large" },
-    },
+    robots: previewRobots(),
   };
 }
 

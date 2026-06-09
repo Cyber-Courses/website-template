@@ -31,6 +31,7 @@ export function proxy(request: NextRequest) {
     pathname === "/robots.txt" ||
     pathname === "/sitemap.xml" ||
     pathname === "/feed.xml" ||
+    pathname === "/oembed" ||
     pathname === "/manifest.webmanifest" ||
     pathname === "/favicon.ico" ||
     PUBLIC_FILE.test(pathname)
