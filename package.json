@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "lint:content": "tsx scripts/lint-content.ts",
+    "seo:audit": "tsx scripts/seo-audit.ts",
     "indexnow": "tsx scripts/indexnow.ts",
     "prepare": "husky"
   },

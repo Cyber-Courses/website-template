@@ -23,6 +23,8 @@ export type Dictionary = {
     publishedOn: string;
     updatedOn: string;
     byAuthor: string;
+    writtenBy: string;
+    estReadingTime: string;
     tags: string;
     share: string;
     noPosts: string;

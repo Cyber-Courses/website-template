@@ -27,8 +27,9 @@ export async function generateMetadata({
       canonical: `${siteConfig.url}/${lang}/search`,
       languages: hreflangFor(siteConfig.url, "/search"),
     },
-    // Searches over user input shouldn't be indexed individually.
-    robots: { index: true, follow: true },
+    // Internal search results are thin/duplicate content — keep them out of the
+    // index but let crawlers follow through to the real pages.
+    robots: { index: false, follow: true },
   };
 }
 

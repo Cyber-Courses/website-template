@@ -32,6 +32,16 @@ export const siteConfig = {
       name: "Your Name",
       url: "https://example.com",
       twitter: "@your_handle",
+      // E-E-A-T signals (Person JSON-LD). All optional but high-value for
+      // authority: who the author is, what they're expert in, and verifiable
+      // profiles. `sameAs` is merged with url/twitter/github automatically.
+      bio: "Short author bio establishing expertise and credentials.",
+      jobTitle: "Founder & Editor",
+      knowsAbout: ["SEO", "Next.js", "Web Performance"],
+      sameAs: [
+        "https://www.linkedin.com/in/your-handle",
+        "https://github.com/your-org",
+      ],
     },
   ],
   defaultOgImage: "/opengraph-image",
@@ -61,6 +71,20 @@ export const siteConfig = {
       areaServed: ["FR", "EU"],
       availableLanguage: ["en", "fr", "es", "de"],
     },
+  },
+  oembed: {
+    /** Consume oEmbed: turn bare URLs in posts into rich embeds. */
+    enabled: true,
+    /** Max width hint sent to providers (px). */
+    maxWidth: 800,
+    /**
+     * Best-effort discovery for hosts not in the curated provider registry
+     * (fetches the page and parses its oEmbed <link>). Off by default — it adds
+     * a network round-trip per unknown bare URL at build time.
+     */
+    discovery: false,
+    /** Provide oEmbed: expose /oembed and discovery <link> tags for our pages. */
+    provide: true,
   },
   verification: {
     google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,

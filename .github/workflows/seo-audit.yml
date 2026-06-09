@@ -1,0 +1,42 @@
+name: SEO audit
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    env:
+      # Audit against localhost so canonical/hreflang/sitemap resolve to the
+      # running server, not the production origin.
+      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Content lint
+        run: npm run lint:content
+
+      - name: Build
+        run: npm run build
+
+      - name: Start server
+        run: |
+          npm start &
+          npx wait-on http://localhost:3000/en --timeout 60000
+
+      - name: SEO audit (canonical / JSON-LD / hreflang reciprocity)
+        run: npm run seo:audit
+
+      - name: Lighthouse CI (SEO + perf budgets)
+        run: npx --yes @lhci/cli@0.14.x autorun
