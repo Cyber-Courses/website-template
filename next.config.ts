@@ -1,6 +1,12 @@
 import type { NextConfig } from "next";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
+import bundleAnalyzer from "@next/bundle-analyzer";
+
+// Dev-only bundle inspection: `ANALYZE=true npm run build` opens treemaps.
+const withBundleAnalyzer = bundleAnalyzer({
+  enabled: process.env.ANALYZE === "true",
+});
 
 /**
  * Content-Security-Policy. Pragmatic for a template: `'unsafe-inline'` is kept
@@ -107,6 +113,7 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: [
       "lucide-react",
+      "@base-ui/react",
       "@next-md-blog/core",
       "react-markdown",
     ],
@@ -130,4 +137,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withBundleAnalyzer(nextConfig);
