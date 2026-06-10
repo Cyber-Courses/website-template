@@ -5,7 +5,7 @@ import { MarkdownContent } from "@next-md-blog/core";
 
 import { glossary } from "@/next-md-blog.config";
 import { oembedDiscoveryTypes } from "@/lib/oembed/resolve";
-import { previewRobots, feedDiscoveryTypes } from "@/lib/seo";
+import { previewRobots, feedDiscoveryTypes, normalizeSchemaDates } from "@/lib/seo";
 import { siteConfig } from "@/site.config";
 import { LOCALES, type Locale } from "@/lib/i18n";
 import { Breadcrumbs } from "@/components/breadcrumbs";
@@ -68,17 +68,19 @@ export default async function GlossaryTerm({
   if (!term) notFound();
 
   // DefinedTerm + Organization + Breadcrumb graph.
-  const jsonLd = glossary.schemaGraph(
-    term,
-    [
-      { name: dict.nav.home, url: `${siteConfig.url}/${locale}` },
-      { name: "Glossary", url: glossary.indexUrl(locale) },
-      {
-        name: (term.frontmatter.title as string) ?? slug,
-        url: glossary.url(slug, locale),
-      },
-    ],
-    { locale },
+  const jsonLd = normalizeSchemaDates(
+    glossary.schemaGraph(
+      term,
+      [
+        { name: dict.nav.home, url: `${siteConfig.url}/${locale}` },
+        { name: "Glossary", url: glossary.indexUrl(locale) },
+        {
+          name: (term.frontmatter.title as string) ?? slug,
+          url: glossary.url(slug, locale),
+        },
+      ],
+      { locale },
+    ),
   );
 
   return (

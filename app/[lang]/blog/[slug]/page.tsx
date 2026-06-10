@@ -8,7 +8,13 @@ import { MarkdownContent, slugifySeries } from "@next-md-blog/core";
 import { blog } from "@/next-md-blog.config";
 import { oembedDiscoveryTypes } from "@/lib/oembed/resolve";
 import { collectVideoObjects } from "@/lib/oembed/video-schema";
-import { previewRobots, feedDiscoveryTypes, articleTwitterLabels } from "@/lib/seo";
+import {
+  previewRobots,
+  feedDiscoveryTypes,
+  articleTwitterLabels,
+  normalizeSchemaDates,
+  toIsoDateTime,
+} from "@/lib/seo";
 import { authorNamesFromFrontmatter } from "@next-md-blog/core";
 import { siteConfig } from "@/site.config";
 import { LOCALES, type Locale } from "@/lib/i18n";
@@ -66,6 +72,13 @@ export async function generateMetadata({
 
   // Yoast parity: snippet/preview robots directives, feed + oEmbed autodiscovery
   // alongside the canonical/hreflang alternates, and the twitter:label/data pairs.
+  // Give OG article times a timezone (Google flags bare dates).
+  const og = meta.openGraph as
+    | { publishedTime?: string; modifiedTime?: string }
+    | undefined;
+  if (og?.publishedTime) og.publishedTime = toIsoDateTime(og.publishedTime);
+  if (og?.modifiedTime) og.modifiedTime = toIsoDateTime(og.modifiedTime);
+
   meta.robots = previewRobots(post.frontmatter);
   meta.alternates = {
     ...meta.alternates,
@@ -144,10 +157,12 @@ export default async function BlogPostPage({
 
   // The collection already handles locale URLs, inLanguage, speakable, and
   // isPartOf (when frontmatter.series is set) — no post-mutation needed.
-  const jsonLd = blog.schemaGraph(post, breadcrumbs, {
-    locale,
-    speakable: true,
-  });
+  const jsonLd = normalizeSchemaDates(
+    blog.schemaGraph(post, breadcrumbs, {
+      locale,
+      speakable: true,
+    }),
+  );
 
   const heroImage =
     (typeof fm.ogImage === "string" && fm.ogImage) ||
@@ -155,11 +170,13 @@ export default async function BlogPostPage({
     null;
 
   // VideoObject JSON-LD for any bare-URL video embeds in the body.
-  const videoObjects = await collectVideoObjects(post.content, {
-    datePublished: date,
-    fallbackDescription:
-      typeof fm.description === "string" ? fm.description : undefined,
-  });
+  const videoObjects = normalizeSchemaDates(
+    await collectVideoObjects(post.content, {
+      datePublished: date,
+      fallbackDescription:
+        typeof fm.description === "string" ? fm.description : undefined,
+    }),
+  );
 
   return (
     <>
