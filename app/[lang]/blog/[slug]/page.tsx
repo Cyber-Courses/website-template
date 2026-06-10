@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { cache } from "react";
 import rehypeSlug from "rehype-slug";
 import { MarkdownContent, slugifySeries } from "@next-md-blog/core";
@@ -27,6 +28,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { markdownComponents } from "@/components/markdown/components";
 import { extractHeadings } from "@/lib/toc";
+import { getImageDims } from "@/lib/image-dims";
 import { getDictionary, hasLocale } from "../../dictionaries";
 
 type Params = { lang: string; slug: string };
@@ -168,6 +170,8 @@ export default async function BlogPostPage({
     (typeof fm.ogImage === "string" && fm.ogImage) ||
     (typeof fm.image === "string" && fm.image) ||
     null;
+  // Real dimensions for the hero so it reserves space (CLS = 0).
+  const heroDims = heroImage ? await getImageDims(heroImage) : null;
 
   // VideoObject JSON-LD for any bare-URL video embeds in the body.
   const videoObjects = normalizeSchemaDates(
@@ -185,14 +189,6 @@ export default async function BlogPostPage({
       {videoObjects.map((v, i) => (
         <JsonLd key={i} data={v} />
       ))}
-      {heroImage && (
-        <link
-          rel="preload"
-          as="image"
-          href={heroImage}
-          fetchPriority="high"
-        />
-      )}
       <main id="main-content" className="container mx-auto px-4 py-10">
         <Breadcrumbs
           items={[
@@ -293,6 +289,22 @@ export default async function BlogPostPage({
                 </div>
               )}
             </header>
+            {heroImage && heroDims && (
+              // LCP element: prioritized (eager + fetchpriority=high + preload)
+              // so it isn't lazy-loaded. Real dims keep CLS at 0.
+              <Image
+                src={heroImage}
+                alt={typeof fm.title === "string" ? fm.title : ""}
+                width={heroDims.width}
+                height={heroDims.height}
+                priority
+                // Next 16's `priority` emits the preload but not fetchpriority
+                // on the <img> — set it explicitly so the LCP element is hinted.
+                fetchPriority="high"
+                sizes="(min-width: 1024px) 768px, 100vw"
+                className="rounded-lg w-full h-auto mb-8"
+              />
+            )}
             <Separator className="mb-8" />
             <div className="prose dark:prose-invert max-w-none prose-headings:scroll-mt-20">
               <MarkdownContent
