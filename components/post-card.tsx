@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import type { ContentMetadata } from "@next-md-blog/core";
 import type { Locale } from "@/lib/i18n";
+import { fmString, fmStringArray, fmTitle } from "@/lib/frontmatter";
 
 export function PostCard({
   post,
@@ -12,8 +13,9 @@ export function PostCard({
   locale: Locale;
 }) {
   const fm = post.frontmatter;
-  const date = typeof fm.date === "string" ? fm.date : undefined;
-  const tags = (fm.tags as string[] | undefined) ?? [];
+  const date = fmString(fm, "date");
+  const description = fmString(fm, "description");
+  const tags = fmStringArray(fm, "tags");
   return (
     <Card>
       <CardHeader>
@@ -22,10 +24,10 @@ export function PostCard({
             href={`/${locale}/blog/${post.slug}`}
             className="hover:underline underline-offset-4"
           >
-            {fm.title ?? post.slug}
+            {fmTitle(post)}
           </Link>
         </CardTitle>
-        {fm.description && <CardDescription>{fm.description as string}</CardDescription>}
+        {description && <CardDescription>{description}</CardDescription>}
       </CardHeader>
       <CardContent className="text-sm text-muted-foreground flex flex-wrap items-center gap-2">
         {date && <time dateTime={date}>{new Date(date).toLocaleDateString(locale)}</time>}

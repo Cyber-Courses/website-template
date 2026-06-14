@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import type { Collection, ContentDoc } from "@next-md-blog/core";
 import { siteConfig } from "@/site.config";
-import { LOCALES, DEFAULT_LOCALE, type Locale } from "@/lib/i18n";
+import { LOCALES, DEFAULT_LOCALE, hreflangFor, type Locale } from "@/lib/i18n";
 import { toIsoDateTime } from "@/lib/schema-dates";
 import { oembedDiscoveryTypes } from "@/lib/oembed/resolve";
 
@@ -78,6 +78,30 @@ export function articleTwitterLabels(opts: {
     out["twitter:data2"] = `${opts.readingTime} ${opts.labels.readingUnit}`;
   }
   return out;
+}
+
+/**
+ * Metadata for a simple static page (privacy, terms, contact, …): canonical +
+ * hreflang + a website-type OG block. `path` is the locale-less route (e.g.
+ * `/privacy`).
+ */
+export function staticPageMetadata(opts: {
+  lang: Locale;
+  path: string;
+  title: string;
+  description: string;
+}): Metadata {
+  const url = `${siteConfig.url}/${opts.lang}${opts.path}`;
+  return {
+    metadataBase: new URL(siteConfig.url),
+    title: opts.title,
+    description: opts.description,
+    alternates: {
+      canonical: url,
+      languages: hreflangFor(siteConfig.url, opts.path),
+    },
+    openGraph: { type: "website", url, title: opts.title },
+  };
 }
 
 /**
