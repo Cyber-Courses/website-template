@@ -4,16 +4,24 @@ import Link from "next/link";
 import Image from "next/image";
 import { cache } from "react";
 import rehypeSlug from "rehype-slug";
-import { MarkdownContent, slugifySeries } from "@next-md-blog/core";
+import { MarkdownContent, authorNamesFromFrontmatter } from "@next-md-blog/core";
 
 import { blog } from "@/next-md-blog.config";
 import { collectVideoObjects } from "@/lib/oembed/video-schema";
 import { buildDocumentMetadata } from "@/lib/metadata";
 import { normalizeSchemaDates } from "@/lib/schema-dates";
-import { authorNamesFromFrontmatter } from "@next-md-blog/core";
-import { siteConfig } from "@/site.config";
+import { relatedPosts } from "@/lib/related-posts";
+import { resolveSeries } from "@/lib/series";
+import {
+  fmString,
+  fmStringArray,
+  fmTitle,
+  resolveHeroImage,
+} from "@/lib/frontmatter";
+import { homeCrumb, blogCrumb, toJsonLdBreadcrumbs } from "@/lib/breadcrumbs";
 import { LOCALES, type Locale } from "@/lib/i18n";
 import { Breadcrumbs } from "@/components/breadcrumbs";
+import { SeriesNav } from "@/components/series-nav";
 import { TableOfContents } from "@/components/table-of-contents";
 import { ReadingProgress } from "@/components/reading-progress";
 import { PostCard } from "@/components/post-card";
@@ -75,11 +83,6 @@ export async function generateMetadata({
   });
 }
 
-function tagOverlap(a: string[], b: string[]) {
-  const set = new Set(a.map((t) => t.toLowerCase()));
-  return b.reduce((n, t) => n + (set.has(t.toLowerCase()) ? 1 : 0), 0);
-}
-
 export default async function BlogPostPage({
   params,
 }: {
@@ -93,53 +96,30 @@ export default async function BlogPostPage({
   if (!post) notFound();
 
   const fm = post.frontmatter;
-  const date = typeof fm.date === "string" ? fm.date : undefined;
-  const updated = typeof fm.updated === "string" ? fm.updated : undefined;
-  const tags = (fm.tags as string[] | undefined) ?? [];
+  const title = fmTitle(post);
+  const description = fmString(fm, "description");
+  const date = fmString(fm, "date");
+  const updated = fmString(fm, "updated");
+  const tags = fmStringArray(fm, "tags");
   const headings = extractHeadings(post.content);
 
-  // Related: same locale, sharing ≥1 tag, top 3 by overlap.
-  const all = await fetchAll(locale);
-  const related = all
-    .filter((p) => p.slug !== post.slug)
-    .map((p) => ({
-      post: p,
-      score: tagOverlap(tags, (p.frontmatter.tags as string[]) ?? []),
-    }))
-    .filter((r) => r.score > 0)
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 3)
-    .map((r) => r.post);
+  const related = relatedPosts(post, await fetchAll(locale));
+  const series = await resolveSeries(post, locale);
 
-  // Series: discover from frontmatter, pull sibling posts.
-  const rawSeries = typeof fm.series === "string" ? fm.series : null;
-  const seriesSlug = rawSeries ? slugifySeries(rawSeries) : null;
-  const seriesTitle =
-    (typeof fm.seriesTitle === "string" && fm.seriesTitle) || rawSeries;
-  const seriesPosts = seriesSlug ? await blog.getBySeries(seriesSlug, { locale }) : [];
-  const currentIndex = seriesSlug
-    ? seriesPosts.findIndex((p) => p.slug === post.slug)
-    : -1;
-
-  const breadcrumbs = [
-    { name: dict.nav.home, url: `${siteConfig.url}/${locale}` },
-    { name: dict.metadata.blogTitle, url: `${siteConfig.url}/${locale}/blog` },
-    { name: fm.title ?? slug, url: blog.url(slug, locale) },
-  ];
-
-  // The collection already handles locale URLs, inLanguage, speakable, and
-  // isPartOf (when frontmatter.series is set) — no post-mutation needed.
+  // One breadcrumb source for the JSON-LD trail (home → blog → post).
   const jsonLd = normalizeSchemaDates(
-    blog.schemaGraph(post, breadcrumbs, {
-      locale,
-      speakable: true,
-    }),
+    blog.schemaGraph(
+      post,
+      toJsonLdBreadcrumbs([
+        homeCrumb(locale, dict),
+        blogCrumb(locale, dict),
+        { name: title, href: `/${locale}/blog/${slug}` },
+      ]),
+      { locale, speakable: true },
+    ),
   );
 
-  const heroImage =
-    (typeof fm.ogImage === "string" && fm.ogImage) ||
-    (typeof fm.image === "string" && fm.image) ||
-    null;
+  const heroImage = resolveHeroImage(fm);
   // Real dimensions for the hero so it reserves space (CLS = 0).
   const heroDims = heroImage ? await getImageDims(heroImage) : null;
 
@@ -147,8 +127,7 @@ export default async function BlogPostPage({
   const videoObjects = normalizeSchemaDates(
     await collectVideoObjects(post.content, {
       datePublished: date,
-      fallbackDescription:
-        typeof fm.description === "string" ? fm.description : undefined,
+      fallbackDescription: description,
     }),
   );
 
@@ -162,65 +141,31 @@ export default async function BlogPostPage({
       <main id="main-content" className="container mx-auto px-4 py-10">
         <Breadcrumbs
           items={[
-            { name: dict.nav.home, href: `/${locale}` },
-            { name: dict.metadata.blogTitle, href: `/${locale}/blog` },
-            ...(seriesSlug
-              ? [
-                  {
-                    name: seriesTitle ?? rawSeries ?? seriesSlug,
-                    href: `/${locale}/topics/${seriesSlug}`,
-                  },
-                ]
+            homeCrumb(locale, dict),
+            blogCrumb(locale, dict),
+            ...(series
+              ? [{ name: series.title, href: `/${locale}/topics/${series.slug}` }]
               : []),
-            { name: fm.title ?? slug },
+            { name: title },
           ]}
         />
 
-        {seriesSlug && currentIndex >= 0 && (
-          <aside
-            className="mt-6 rounded-md border bg-muted/40 px-4 py-3 text-sm flex flex-wrap gap-x-3 gap-y-1 items-center justify-between"
-            aria-label="Series"
-          >
-            <span className="text-muted-foreground">
-              Part {currentIndex + 1} of {seriesPosts.length} in{" "}
-              <Link
-                href={`/${locale}/topics/${seriesSlug}`}
-                className="font-medium text-foreground underline underline-offset-2"
-              >
-                {seriesTitle ?? rawSeries}
-              </Link>
-            </span>
-            <span className="flex gap-3">
-              {currentIndex > 0 && (
-                <Link
-                  href={`/${locale}/blog/${seriesPosts[currentIndex - 1].slug}`}
-                  className="hover:underline"
-                  rel="prev"
-                >
-                  ← {dict.blog.previous}
-                </Link>
-              )}
-              {currentIndex < seriesPosts.length - 1 && (
-                <Link
-                  href={`/${locale}/blog/${seriesPosts[currentIndex + 1].slug}`}
-                  className="hover:underline"
-                  rel="next"
-                >
-                  {dict.blog.next} →
-                </Link>
-              )}
-            </span>
-          </aside>
+        {series && (
+          <SeriesNav
+            series={series}
+            locale={locale}
+            labels={{ previous: dict.blog.previous, next: dict.blog.next }}
+          />
         )}
 
         <div className="mt-8 grid gap-10 lg:grid-cols-[1fr_240px]">
           <article>
             <header className="space-y-4 mb-8">
               <h1 className="text-3xl md:text-5xl font-semibold tracking-tight">
-                {fm.title ?? slug}
+                {title}
               </h1>
-              {fm.description && (
-                <p className="text-lg text-muted-foreground">{fm.description as string}</p>
+              {description && (
+                <p className="text-lg text-muted-foreground">{description}</p>
               )}
               <div className="text-sm text-muted-foreground flex flex-wrap gap-x-4 gap-y-2 items-center">
                 {date && (
@@ -264,7 +209,7 @@ export default async function BlogPostPage({
               // so it isn't lazy-loaded. Real dims keep CLS at 0.
               <Image
                 src={heroImage}
-                alt={typeof fm.title === "string" ? fm.title : ""}
+                alt={fmString(fm, "title") ?? ""}
                 width={heroDims.width}
                 height={heroDims.height}
                 priority
