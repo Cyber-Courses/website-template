@@ -61,7 +61,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { lang, slug } = await params;
   if (!hasLocale(lang)) return {};
-  const locale = lang as Locale;
+  const locale = lang;
   const post = await fetchPost(locale, slug);
   if (!post) return { title: "Not found" };
   const dict = await getDictionary(locale);
@@ -90,7 +90,7 @@ export default async function BlogPostPage({
 }) {
   const { lang, slug } = await params;
   if (!hasLocale(lang)) notFound();
-  const locale = lang as Locale;
+  const locale = lang;
   const dict = await getDictionary(locale);
   const post = await fetchPost(locale, slug);
   if (!post) notFound();

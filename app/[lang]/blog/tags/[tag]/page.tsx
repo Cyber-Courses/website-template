@@ -35,7 +35,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { lang, tag } = await params;
   if (!hasLocale(lang)) return {};
-  const locale = lang as Locale;
+  const locale = lang;
   const dict = await getDictionary(locale);
   const decoded = decodeURIComponent(tag);
   return {
@@ -54,7 +54,7 @@ export default async function TagPage({
 }) {
   const { lang, tag } = await params;
   if (!hasLocale(lang)) notFound();
-  const locale = lang as Locale;
+  const locale = lang;
   const dict = await getDictionary(locale);
   const decoded = decodeURIComponent(tag).toLowerCase();
   const posts = await blog.getAll({ locale });

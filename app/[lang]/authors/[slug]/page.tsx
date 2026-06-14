@@ -69,7 +69,7 @@ export default async function AuthorPage({
 }) {
   const { lang, slug } = await params;
   if (!hasLocale(lang)) notFound();
-  const locale = lang as Locale;
+  const locale = lang;
   const dict = await getDictionary(locale);
   const author = resolveAuthorBySlug(slug);
   if (!author) notFound();

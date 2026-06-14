@@ -36,7 +36,7 @@ export default async function PrivacyPage({
 }) {
   const { lang } = await params;
   if (!hasLocale(lang)) notFound();
-  const locale = lang as Locale;
+  const locale = lang;
   const dict = await getDictionary(locale);
   const url = `${siteConfig.url}/${lang}/privacy`;
   return (

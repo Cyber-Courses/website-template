@@ -41,7 +41,7 @@ export default async function GlossaryIndex({
 }) {
   const { lang } = await params;
   if (!hasLocale(lang)) notFound();
-  const locale = lang as Locale;
+  const locale = lang;
   const dict = await getDictionary(locale);
   const terms = await glossary.getAll({ locale });
   const url = `${siteConfig.url}/${lang}/glossary`;

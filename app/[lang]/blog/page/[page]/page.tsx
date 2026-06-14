@@ -34,7 +34,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { lang, page } = await params;
   if (!hasLocale(lang)) return {};
-  const locale = lang as Locale;
+  const locale = lang;
   const dict = await getDictionary(locale);
   const n = Number(page);
   const url = `${siteConfig.url}/${lang}/blog/page/${n}`;
@@ -58,7 +58,7 @@ export default async function BlogIndexPaginated({
 }) {
   const { lang, page } = await params;
   if (!hasLocale(lang)) notFound();
-  const locale = lang as Locale;
+  const locale = lang;
   const n = Math.max(1, Number(page) || 1);
   const dict = await getDictionary(locale);
   const posts = await blog.getAll({ locale });

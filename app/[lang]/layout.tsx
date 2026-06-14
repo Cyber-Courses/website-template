@@ -97,7 +97,7 @@ export default async function LangLayout({
 }) {
   const { lang } = await params;
   if (!hasLocale(lang)) notFound();
-  const dict = await getDictionary(lang as Locale);
+  const dict = await getDictionary(lang);
   return (
     <html
       lang={lang}
@@ -115,9 +115,9 @@ export default async function LangLayout({
           Skip to content
         </a>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          <SiteHeader locale={lang as Locale} dict={dict} />
+          <SiteHeader locale={lang} dict={dict} />
           <div className="flex-1">{children}</div>
-          <SiteFooter locale={lang as Locale} dict={dict} />
+          <SiteFooter locale={lang} dict={dict} />
         </ThemeProvider>
         <WebsiteJsonLd locale={lang} />
         <JsonLd data={generateOrganizationSchema(site)} />

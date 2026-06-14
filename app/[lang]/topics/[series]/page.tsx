@@ -48,7 +48,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { lang, series } = await params;
   if (!hasLocale(lang)) return {};
-  const locale = lang as Locale;
+  const locale = lang;
   const posts = await blog.getBySeries(series, { locale });
   const title = seriesTitleFromPosts(posts, series);
   const url = `${siteConfig.url}/${lang}/topics/${series}`;
@@ -71,7 +71,7 @@ export default async function SeriesPillar({
 }) {
   const { lang, series } = await params;
   if (!hasLocale(lang)) notFound();
-  const locale = lang as Locale;
+  const locale = lang;
   const dict = await getDictionary(locale);
   const posts = await blog.getBySeries(series, { locale });
   if (!posts.length) notFound();

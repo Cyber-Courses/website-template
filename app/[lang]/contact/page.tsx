@@ -36,7 +36,7 @@ export default async function ContactPage({
 }) {
   const { lang } = await params;
   if (!hasLocale(lang)) notFound();
-  const locale = lang as Locale;
+  const locale = lang;
   const dict = await getDictionary(locale);
   const url = `${siteConfig.url}/${lang}/contact`;
   const { contactPoint, address } = siteConfig.organization;
