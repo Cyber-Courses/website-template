@@ -3,7 +3,9 @@ import { notFound } from "next/navigation";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { JsonLd } from "@/components/seo/json-ld";
 import { siteConfig } from "@/site.config";
-import { LOCALES, hreflangFor, type Locale } from "@/lib/i18n";
+import { LOCALES, type Locale } from "@/lib/i18n";
+import { staticPageMetadata } from "@/lib/metadata";
+import { homeCrumb } from "@/lib/breadcrumbs";
 import { getDictionary, hasLocale } from "../dictionaries";
 
 type Params = { lang: string };
@@ -19,17 +21,12 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { lang } = await params;
   if (!hasLocale(lang)) return {};
-  const url = `${siteConfig.url}/${lang}/contact`;
-  return {
-    metadataBase: new URL(siteConfig.url),
+  return staticPageMetadata({
+    lang,
+    path: "/contact",
     title: "Contact",
     description: `Get in touch with ${siteConfig.name}.`,
-    alternates: {
-      canonical: url,
-      languages: hreflangFor(siteConfig.url, "/contact"),
-    },
-    openGraph: { type: "website", url, title: "Contact" },
-  };
+  });
 }
 
 export default async function ContactPage({
@@ -79,10 +76,7 @@ export default async function ContactPage({
         className="container mx-auto px-4 py-12 max-w-3xl prose dark:prose-invert"
       >
         <Breadcrumbs
-          items={[
-            { name: dict.nav.home, href: `/${locale}` },
-            { name: "Contact" },
-          ]}
+          items={[homeCrumb(locale, dict), { name: "Contact" }]}
         />
         <h1>Contact</h1>
         <p>The fastest way to reach us:</p>

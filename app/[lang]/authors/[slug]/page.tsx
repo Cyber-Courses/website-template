@@ -6,7 +6,7 @@ import { slugifyAuthor } from "@next-md-blog/core";
 import { PostCard } from "@/components/post-card";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { homeCrumb, blogCrumb } from "@/lib/breadcrumbs";
-import { fmTitle } from "@/lib/frontmatter";
+import { toCollectionItems } from "@/lib/collection";
 import { PersonJsonLd, type RichAuthor } from "@/components/seo/person-jsonld";
 import { CollectionJsonLd } from "@/components/seo/collection-jsonld";
 import { blog } from "@/next-md-blog.config";
@@ -82,10 +82,7 @@ export default async function AuthorPage({
       <CollectionJsonLd
         url={url}
         name={`${author.name} — ${dict.metadata.blogTitle}`}
-        items={posts.map((p) => ({
-          name: fmTitle(p),
-          url: blog.url(p.slug, locale),
-        }))}
+        items={toCollectionItems(posts, blog, locale)}
         inLanguage={locale}
       />
       <main id="main-content" className="container mx-auto px-4 py-12">

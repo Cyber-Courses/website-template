@@ -7,7 +7,7 @@ import { CollectionJsonLd } from "@/components/seo/collection-jsonld";
 import { blog } from "@/next-md-blog.config";
 import { siteConfig } from "@/site.config";
 import { LOCALES, hreflangFor, type Locale } from "@/lib/i18n";
-import { fmTitle } from "@/lib/frontmatter";
+import { toCollectionItems } from "@/lib/collection";
 import { homeCrumb } from "@/lib/breadcrumbs";
 import { getDictionary, hasLocale } from "../dictionaries";
 
@@ -62,10 +62,7 @@ export default async function BlogIndex({
         name={dict.metadata.blogTitle}
         description={dict.metadata.blogDescription}
         inLanguage={locale}
-        items={posts.map((p) => ({
-          name: fmTitle(p),
-          url: blog.url(p.slug, locale),
-        }))}
+        items={toCollectionItems(posts, blog, locale)}
       />
       <main id="main-content" className="container mx-auto px-4 py-12">
         <Breadcrumbs

@@ -7,6 +7,7 @@ import { PostCard } from "@/components/post-card";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { homeCrumb, blogCrumb } from "@/lib/breadcrumbs";
 import { fmTitle } from "@/lib/frontmatter";
+import { toCollectionItems } from "@/lib/collection";
 import { CollectionJsonLd } from "@/components/seo/collection-jsonld";
 import { blog } from "@/next-md-blog.config";
 import { siteConfig } from "@/site.config";
@@ -84,10 +85,7 @@ export default async function SeriesPillar({
         name={title}
         description={`All posts in the "${title}" series.`}
         inLanguage={locale}
-        items={posts.map((p) => ({
-          name: fmTitle(p),
-          url: blog.url(p.slug, locale),
-        }))}
+        items={toCollectionItems(posts, blog, locale)}
       />
       <main id="main-content" className="container mx-auto px-4 py-12">
         <Breadcrumbs
@@ -116,7 +114,7 @@ export default async function SeriesPillar({
                 href={`/${locale}/blog/${p.slug}`}
                 className="font-medium hover:underline"
               >
-                {(p.frontmatter.title as string) ?? p.slug}
+                {fmTitle(p)}
               </Link>
               {typeof p.frontmatter.description === "string" && (
                 <p className="text-sm text-muted-foreground mt-1">

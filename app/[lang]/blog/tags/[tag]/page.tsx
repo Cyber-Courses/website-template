@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { PostCard } from "@/components/post-card";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { homeCrumb, blogCrumb } from "@/lib/breadcrumbs";
-import { fmTitle } from "@/lib/frontmatter";
+import { toCollectionItems } from "@/lib/collection";
 import { CollectionJsonLd } from "@/components/seo/collection-jsonld";
 import { blog } from "@/next-md-blog.config";
 import { siteConfig } from "@/site.config";
@@ -71,10 +71,7 @@ export default async function TagPage({
         url={url}
         name={`${dict.tag.title}: #${decoded}`}
         inLanguage={locale}
-        items={filtered.map((p) => ({
-          name: fmTitle(p),
-          url: blog.url(p.slug, locale),
-        }))}
+        items={toCollectionItems(filtered, blog, locale)}
       />
       <main id="main-content" className="container mx-auto px-4 py-12">
       <Breadcrumbs
