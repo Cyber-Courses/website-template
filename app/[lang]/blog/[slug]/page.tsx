@@ -13,9 +13,8 @@ import {
   previewRobots,
   feedDiscoveryTypes,
   articleTwitterLabels,
-  normalizeSchemaDates,
-  toIsoDateTime,
-} from "@/lib/seo";
+} from "@/lib/metadata";
+import { normalizeSchemaDates, toIsoDateTime } from "@/lib/schema-dates";
 import { authorNamesFromFrontmatter } from "@next-md-blog/core";
 import { siteConfig } from "@/site.config";
 import { LOCALES, type Locale } from "@/lib/i18n";
