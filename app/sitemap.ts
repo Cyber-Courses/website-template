@@ -3,6 +3,8 @@ import { composeSitemap } from "@next-md-blog/core";
 import { blog, glossary } from "@/next-md-blog.config";
 import { siteConfig } from "@/site.config";
 import { LOCALES, DEFAULT_LOCALE, hreflangFor } from "@/lib/i18n";
+import { toAbsoluteUrl } from "@/lib/url";
+import { resolveHeroImage } from "@/lib/frontmatter";
 
 /*
  * Google caps a single sitemap at 50,000 URLs / 50 MB. When you grow past
@@ -30,10 +32,6 @@ function staticEntry(
   };
 }
 
-function absolute(src: string): string {
-  return /^https?:\/\//i.test(src) ? src : `${siteConfig.url}${src}`;
-}
-
 /**
  * Map each post/term URL to its hero/OG image so the sitemap can carry
  * `<image:image>` entries (Google Images discovery). Built once across locales.
@@ -44,12 +42,10 @@ async function buildImageMap(): Promise<Map<string, string>> {
     for (const locale of LOCALES) {
       const docs = await collection.getAll({ locale });
       for (const doc of docs) {
-        const fm = doc.frontmatter;
-        const image =
-          (typeof fm.ogImage === "string" && fm.ogImage) ||
-          (typeof fm.image === "string" && fm.image) ||
-          null;
-        if (image) map.set(collection.url(doc.slug, locale), absolute(image));
+        const image = resolveHeroImage(doc.frontmatter);
+        if (image) {
+          map.set(collection.url(doc.slug, locale), toAbsoluteUrl(image));
+        }
       }
     }
   }

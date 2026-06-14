@@ -1,6 +1,7 @@
 import Image from "next/image";
 import type { ComponentProps } from "react";
 import { getImageDims } from "@/lib/image-dims";
+import { isAbsoluteUrl } from "@/lib/url";
 
 type Props = Omit<ComponentProps<"img">, "src"> & {
   src?: string;
@@ -25,7 +26,7 @@ export async function MdImage({
   const explicit =
     width && height ? { width: Number(width), height: Number(height) } : null;
   const dims = explicit ?? (await getImageDims(src));
-  const isExternal = /^https?:\/\//.test(src);
+  const isExternal = isAbsoluteUrl(src);
   const img = (
     <Image
       src={src}
