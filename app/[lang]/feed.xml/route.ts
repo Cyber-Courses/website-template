@@ -15,5 +15,5 @@ export async function GET(
 ) {
   const { lang } = await params;
   if (!hasLocale(lang)) notFound();
-  return blog.rssResponse({ locale: lang as Locale });
+  return blog.rssResponse({ locale: lang });
 }

@@ -33,7 +33,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { lang, slug } = await params;
   if (!hasLocale(lang)) return {};
-  const locale = lang as Locale;
+  const locale = lang;
   const term = await glossary.getOne(slug, { locale });
   if (!term) return { title: "Not found" };
 
@@ -47,7 +47,7 @@ export default async function GlossaryTerm({
 }) {
   const { lang, slug } = await params;
   if (!hasLocale(lang)) notFound();
-  const locale = lang as Locale;
+  const locale = lang;
   const dict = await getDictionary(locale);
   const term = await glossary.getOne(slug, { locale });
   if (!term) notFound();

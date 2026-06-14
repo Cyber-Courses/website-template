@@ -19,7 +19,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { lang } = await params;
   if (!hasLocale(lang)) return {};
-  const dict = await getDictionary(lang as Locale);
+  const dict = await getDictionary(lang);
   return {
     title: dict.metadata.sitemapTitle,
     description: dict.metadata.sitemapDescription,
@@ -37,7 +37,7 @@ export default async function HtmlSitemap({
 }) {
   const { lang } = await params;
   if (!hasLocale(lang)) notFound();
-  const locale = lang as Locale;
+  const locale = lang;
   const dict = await getDictionary(locale);
   const posts = await blog.getAll({ locale });
   return (
