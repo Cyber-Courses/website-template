@@ -6,6 +6,7 @@ import { slugifyAuthor } from "@next-md-blog/core";
 import { PostCard } from "@/components/post-card";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { homeCrumb, blogCrumb } from "@/lib/breadcrumbs";
+import { fmTitle } from "@/lib/frontmatter";
 import { PersonJsonLd, type RichAuthor } from "@/components/seo/person-jsonld";
 import { CollectionJsonLd } from "@/components/seo/collection-jsonld";
 import { blog } from "@/next-md-blog.config";
@@ -82,8 +83,8 @@ export default async function AuthorPage({
         url={url}
         name={`${author.name} — ${dict.metadata.blogTitle}`}
         items={posts.map((p) => ({
-          name: (p.frontmatter.title as string) ?? p.slug,
-          url: `${siteConfig.url}/${locale}/blog/${p.slug}`,
+          name: fmTitle(p),
+          url: blog.url(p.slug, locale),
         }))}
         inLanguage={locale}
       />
