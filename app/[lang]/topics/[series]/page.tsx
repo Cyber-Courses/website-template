@@ -27,6 +27,8 @@ function seriesTitleFromPosts(
   return fallback;
 }
 
+export const dynamicParams = false;
+
 export async function generateStaticParams() {
   const slugs = await blog.getAllSeriesSlugs(LOCALES);
   const out: Params[] = [];

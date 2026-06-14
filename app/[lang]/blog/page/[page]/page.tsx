@@ -12,6 +12,8 @@ const PAGE_SIZE = 9;
 
 type Params = { lang: string; page: string };
 
+export const dynamicParams = false;
+
 export async function generateStaticParams() {
   const out: { lang: string; page: string }[] = [];
   for (const lang of LOCALES) {

@@ -11,6 +11,8 @@ import { getDictionary, hasLocale } from "../../../dictionaries";
 
 type Params = { lang: string; tag: string };
 
+export const dynamicParams = false;
+
 export async function generateStaticParams() {
   const out: Params[] = [];
   for (const lang of LOCALES) {

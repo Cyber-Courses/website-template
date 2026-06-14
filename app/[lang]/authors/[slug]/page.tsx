@@ -22,6 +22,8 @@ function resolveAuthorBySlug(slug: string): RichAuthor | null {
   return null;
 }
 
+export const dynamicParams = false;
+
 export async function generateStaticParams() {
   const slugs = await blog.getAllAuthorSlugs(LOCALES);
   const out: Params[] = [];
