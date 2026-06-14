@@ -7,14 +7,9 @@ import rehypeSlug from "rehype-slug";
 import { MarkdownContent, slugifySeries } from "@next-md-blog/core";
 
 import { blog } from "@/next-md-blog.config";
-import { oembedDiscoveryTypes } from "@/lib/oembed/resolve";
 import { collectVideoObjects } from "@/lib/oembed/video-schema";
-import {
-  previewRobots,
-  feedDiscoveryTypes,
-  articleTwitterLabels,
-} from "@/lib/metadata";
-import { normalizeSchemaDates, toIsoDateTime } from "@/lib/schema-dates";
+import { buildDocumentMetadata } from "@/lib/metadata";
+import { normalizeSchemaDates } from "@/lib/schema-dates";
 import { authorNamesFromFrontmatter } from "@next-md-blog/core";
 import { siteConfig } from "@/site.config";
 import { LOCALES, type Locale } from "@/lib/i18n";
@@ -61,40 +56,14 @@ export async function generateMetadata({
   const locale = lang as Locale;
   const post = await fetchPost(locale, slug);
   if (!post) return { title: "Not found" };
-
-  // Hreflang: only locales that actually have a translation.
-  const languages = await blog.hreflangMap(slug, LOCALES);
-  languages["x-default"] = languages.en ?? blog.url(slug, locale);
-
-  const meta = await blog.metadata(post, {
-    locale,
-    titleTemplate: "absolute",
-    alternateLanguages: languages,
-  });
-
-  const url = blog.url(slug, locale);
   const dict = await getDictionary(locale);
 
-  // Yoast parity: snippet/preview robots directives, feed + oEmbed autodiscovery
-  // alongside the canonical/hreflang alternates, and the twitter:label/data pairs.
-  // Give OG article times a timezone (Google flags bare dates).
-  const og = meta.openGraph as
-    | { publishedTime?: string; modifiedTime?: string }
-    | undefined;
-  if (og?.publishedTime) og.publishedTime = toIsoDateTime(og.publishedTime);
-  if (og?.modifiedTime) og.modifiedTime = toIsoDateTime(og.modifiedTime);
-
-  meta.robots = previewRobots(post.frontmatter);
-  meta.alternates = {
-    ...meta.alternates,
-    types: {
-      ...feedDiscoveryTypes(locale),
-      ...oembedDiscoveryTypes(url),
-    },
-  };
-  meta.other = {
-    ...meta.other,
-    ...articleTwitterLabels({
+  return buildDocumentMetadata({
+    collection: blog,
+    doc: post,
+    slug,
+    locale,
+    twitter: {
       author: authorNamesFromFrontmatter(post.frontmatter)[0],
       readingTime: post.readingTime,
       labels: {
@@ -102,10 +71,8 @@ export async function generateMetadata({
         estReadingTime: dict.blog.estReadingTime,
         readingUnit: dict.blog.readingTime,
       },
-    }),
-  };
-
-  return { metadataBase: new URL(siteConfig.url), ...meta };
+    },
+  });
 }
 
 function tagOverlap(a: string[], b: string[]) {

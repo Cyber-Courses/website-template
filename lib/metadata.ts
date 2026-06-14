@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
+import type { Collection, ContentDoc } from "@next-md-blog/core";
 import { siteConfig } from "@/site.config";
-import { LOCALES, type Locale } from "@/lib/i18n";
+import { LOCALES, DEFAULT_LOCALE, type Locale } from "@/lib/i18n";
+import { toIsoDateTime } from "@/lib/schema-dates";
+import { oembedDiscoveryTypes } from "@/lib/oembed/resolve";
 
 type Robots = NonNullable<Metadata["robots"]>;
 type AlternateTypes = NonNullable<NonNullable<Metadata["alternates"]>["types"]>;
@@ -75,4 +78,49 @@ export function articleTwitterLabels(opts: {
     out["twitter:data2"] = `${opts.readingTime} ${opts.labels.readingUnit}`;
   }
   return out;
+}
+
+/**
+ * Build the full per-document Metadata for a collection page (blog post,
+ * glossary term, …): hreflang + x-default, the collection's base metadata,
+ * timezone-corrected OG times, preview robots, and feed + oEmbed autodiscovery.
+ * Pass `twitter` to add the author / reading-time `twitter:label` pairs.
+ */
+export async function buildDocumentMetadata(opts: {
+  collection: Collection;
+  doc: ContentDoc;
+  slug: string;
+  locale: Locale;
+  twitter?: Parameters<typeof articleTwitterLabels>[0];
+}): Promise<Metadata> {
+  const { collection, doc, slug, locale, twitter } = opts;
+
+  // Hreflang: only locales that have a translation; x-default → en, else self.
+  const languages = await collection.hreflangMap(slug, LOCALES);
+  const url = collection.url(slug, locale);
+  languages["x-default"] = languages[DEFAULT_LOCALE] ?? url;
+
+  const meta = await collection.metadata(doc, {
+    locale,
+    titleTemplate: "absolute",
+    alternateLanguages: languages,
+  });
+
+  // Give OG article times a timezone (Google flags bare dates).
+  const og = meta.openGraph as
+    | { publishedTime?: string; modifiedTime?: string }
+    | undefined;
+  if (og?.publishedTime) og.publishedTime = toIsoDateTime(og.publishedTime);
+  if (og?.modifiedTime) og.modifiedTime = toIsoDateTime(og.modifiedTime);
+
+  meta.robots = previewRobots(doc.frontmatter);
+  meta.alternates = {
+    ...meta.alternates,
+    types: { ...feedDiscoveryTypes(locale), ...oembedDiscoveryTypes(url) },
+  };
+  if (twitter) {
+    meta.other = { ...meta.other, ...articleTwitterLabels(twitter) };
+  }
+
+  return { metadataBase: new URL(siteConfig.url), ...meta };
 }
