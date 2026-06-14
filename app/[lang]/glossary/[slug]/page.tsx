@@ -4,8 +4,7 @@ import rehypeSlug from "rehype-slug";
 import { MarkdownContent } from "@next-md-blog/core";
 
 import { glossary } from "@/next-md-blog.config";
-import { oembedDiscoveryTypes } from "@/lib/oembed/resolve";
-import { previewRobots, feedDiscoveryTypes } from "@/lib/metadata";
+import { buildDocumentMetadata } from "@/lib/metadata";
 import { normalizeSchemaDates } from "@/lib/schema-dates";
 import { siteConfig } from "@/site.config";
 import { LOCALES, type Locale } from "@/lib/i18n";
@@ -37,25 +36,8 @@ export async function generateMetadata({
   const locale = lang as Locale;
   const term = await glossary.getOne(slug, { locale });
   if (!term) return { title: "Not found" };
-  const languages = await glossary.hreflangMap(slug, LOCALES);
-  languages["x-default"] = languages.en ?? glossary.url(slug, locale);
 
-  const meta = await glossary.metadata(term, {
-    locale,
-    titleTemplate: "absolute",
-    alternateLanguages: languages,
-  });
-
-  meta.robots = previewRobots(term.frontmatter);
-  meta.alternates = {
-    ...meta.alternates,
-    types: {
-      ...feedDiscoveryTypes(locale),
-      ...oembedDiscoveryTypes(glossary.url(slug, locale)),
-    },
-  };
-
-  return { metadataBase: new URL(siteConfig.url), ...meta };
+  return buildDocumentMetadata({ collection: glossary, doc: term, slug, locale });
 }
 
 export default async function GlossaryTerm({
