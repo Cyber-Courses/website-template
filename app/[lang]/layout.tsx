@@ -5,7 +5,7 @@ import "../globals.css";
 
 import { siteConfig } from "@/site.config";
 import { LOCALES, hreflangFor, type Locale } from "@/lib/i18n";
-import { previewRobots } from "@/lib/seo";
+import { previewRobots, feedDiscoveryTypes } from "@/lib/metadata";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
@@ -56,15 +56,7 @@ export async function generateMetadata({
     alternates: {
       canonical: url,
       languages: hreflangFor(siteConfig.url, "/"),
-      types: {
-        "application/rss+xml": [
-          { url: `/${lang}/feed.xml`, title: `${siteConfig.name} — ${lang}` },
-          ...LOCALES.filter((l) => l !== lang).map((l) => ({
-            url: `/${l}/feed.xml`,
-            title: `${siteConfig.name} — ${l}`,
-          })),
-        ],
-      },
+      types: feedDiscoveryTypes(lang),
     },
     openGraph: {
       type: "website",
