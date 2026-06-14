@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
+import type { Crumb } from "@/lib/breadcrumbs";
 
-export type Crumb = { name: string; href?: string };
+export type { Crumb };
 
 export function Breadcrumbs({
   items,

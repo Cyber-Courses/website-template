@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PostCard } from "@/components/post-card";
 import { Breadcrumbs } from "@/components/breadcrumbs";
+import { homeCrumb, blogCrumb } from "@/lib/breadcrumbs";
 import { CollectionJsonLd } from "@/components/seo/collection-jsonld";
 import { blog } from "@/next-md-blog.config";
 import { siteConfig } from "@/site.config";
@@ -77,8 +78,8 @@ export default async function TagPage({
       <main id="main-content" className="container mx-auto px-4 py-12">
       <Breadcrumbs
         items={[
-          { name: dict.nav.home, href: `/${locale}` },
-          { name: dict.metadata.blogTitle, href: `/${locale}/blog` },
+          homeCrumb(locale, dict),
+          blogCrumb(locale, dict),
           { name: `#${decoded}` },
         ]}
       />
