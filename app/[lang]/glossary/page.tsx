@@ -6,6 +6,8 @@ import { CollectionJsonLd } from "@/components/seo/collection-jsonld";
 import { glossary } from "@/next-md-blog.config";
 import { siteConfig } from "@/site.config";
 import { LOCALES, hreflangFor, type Locale } from "@/lib/i18n";
+import { fmTitle } from "@/lib/frontmatter";
+import { homeCrumb } from "@/lib/breadcrumbs";
 import { getDictionary, hasLocale } from "../dictionaries";
 
 type Params = { lang: string };
@@ -52,16 +54,13 @@ export default async function GlossaryIndex({
         description="Plain-language definitions of SEO terms."
         inLanguage={locale}
         items={terms.map((t) => ({
-          name: (t.frontmatter.title as string) ?? t.slug,
+          name: fmTitle(t),
           url: glossary.url(t.slug, locale),
         }))}
       />
       <main id="main-content" className="container mx-auto px-4 py-12 max-w-3xl">
         <Breadcrumbs
-          items={[
-            { name: dict.nav.home, href: `/${locale}` },
-            { name: "Glossary" },
-          ]}
+          items={[homeCrumb(locale, dict), { name: "Glossary" }]}
         />
         <h1 className="mt-4 text-3xl md:text-4xl font-semibold tracking-tight">
           Glossary

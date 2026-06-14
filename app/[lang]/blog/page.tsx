@@ -7,6 +7,8 @@ import { CollectionJsonLd } from "@/components/seo/collection-jsonld";
 import { blog } from "@/next-md-blog.config";
 import { siteConfig } from "@/site.config";
 import { LOCALES, hreflangFor, type Locale } from "@/lib/i18n";
+import { fmTitle } from "@/lib/frontmatter";
+import { homeCrumb } from "@/lib/breadcrumbs";
 import { getDictionary, hasLocale } from "../dictionaries";
 
 const PAGE_SIZE = 9;
@@ -61,16 +63,13 @@ export default async function BlogIndex({
         description={dict.metadata.blogDescription}
         inLanguage={locale}
         items={posts.map((p) => ({
-          name: (p.frontmatter.title as string) ?? p.slug,
-          url: `${siteConfig.url}/${locale}/blog/${p.slug}`,
+          name: fmTitle(p),
+          url: blog.url(p.slug, locale),
         }))}
       />
       <main id="main-content" className="container mx-auto px-4 py-12">
         <Breadcrumbs
-        items={[
-          { name: dict.nav.home, href: `/${locale}` },
-          { name: dict.metadata.blogTitle },
-        ]}
+        items={[homeCrumb(locale, dict), { name: dict.metadata.blogTitle }]}
       />
       <h1 className="mt-4 text-3xl md:text-4xl font-semibold tracking-tight">
         {dict.metadata.blogTitle}

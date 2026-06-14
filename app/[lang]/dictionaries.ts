@@ -1,5 +1,9 @@
 import "server-only";
-import { isLocale, type Locale } from "@/lib/i18n";
+import { type Locale } from "@/lib/i18n";
+
+// Single source of truth lives in lib/i18n; re-exported here for the pages that
+// already import locale helpers from this module.
+export { hasLocale } from "@/lib/i18n";
 
 export type Dictionary = {
   metadata: {
@@ -48,10 +52,6 @@ const loaders: Record<Locale, () => Promise<Dictionary>> = {
   de: () =>
     import("./dictionaries/de.json").then((m) => m.default as Dictionary),
 };
-
-export function hasLocale(value: string): value is Locale {
-  return isLocale(value);
-}
 
 export async function getDictionary(locale: Locale): Promise<Dictionary> {
   return loaders[locale]();
