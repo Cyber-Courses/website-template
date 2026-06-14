@@ -1,6 +1,8 @@
 import { collections } from "@/next-md-blog.config";
 import { siteConfig } from "@/site.config";
 import { isLocale } from "@/lib/i18n";
+import { toAbsoluteUrl } from "@/lib/url";
+import { resolveHeroImage, fmString } from "@/lib/frontmatter";
 import type { OEmbedResponse } from "./types";
 
 /**
@@ -31,10 +33,6 @@ export function oembedDiscoveryTypes(
     "application/json+oembed": oembedEndpoint(pageUrl, "json"),
     "text/xml+oembed": oembedEndpoint(pageUrl, "xml"),
   };
-}
-
-function absolute(src: string): string {
-  return /^https?:\/\//i.test(src) ? src : `${siteConfig.url}${src}`;
 }
 
 function authorName(authors: (string | { name: string })[]): string | undefined {
@@ -80,20 +78,17 @@ export async function resolveOEmbed(
   if (!doc) return null;
 
   const fm = doc.frontmatter;
-  const image =
-    (typeof fm.ogImage === "string" && fm.ogImage) ||
-    (typeof fm.image === "string" && fm.image) ||
-    null;
+  const image = resolveHeroImage(fm);
 
   return {
     type: "link",
     version: "1.0",
-    title: fm.title ?? slug,
+    title: fmString(fm, "title") ?? slug,
     author_name: authorName(doc.authors),
     author_url: authorUrl(doc.authors),
     provider_name: siteConfig.name,
     provider_url: siteConfig.url,
     cache_age: 86400,
-    ...(image ? { thumbnail_url: absolute(image) } : {}),
+    ...(image ? { thumbnail_url: toAbsoluteUrl(image) } : {}),
   };
 }

@@ -1,16 +1,13 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { imageSize } from "image-size";
+import { isAbsoluteUrl } from "@/lib/url";
 
 export type Dims = { width: number; height: number };
 
 const cache = new Map<string, Dims | null>();
 
 const DEFAULT: Dims = { width: 1200, height: 630 };
-
-function isAbsoluteHttp(src: string): boolean {
-  return /^https?:\/\//i.test(src);
-}
 
 async function loadLocal(src: string): Promise<Buffer | null> {
   try {
@@ -45,7 +42,7 @@ export async function getImageDims(src: string | undefined): Promise<Dims> {
   if (!src) return DEFAULT;
   if (cache.has(src)) return cache.get(src) ?? DEFAULT;
 
-  const buf = isAbsoluteHttp(src)
+  const buf = isAbsoluteUrl(src)
     ? await loadRemote(src)
     : await loadLocal(src);
 
