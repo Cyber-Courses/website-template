@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { blog } from "@/next-md-blog.config";
 import { PostCard } from "@/components/post-card";
 import { Breadcrumbs } from "@/components/breadcrumbs";
+import { homeCrumb, blogCrumb } from "@/lib/breadcrumbs";
 import { Pagination } from "@/components/pagination";
 import { siteConfig } from "@/site.config";
 import { LOCALES, hreflangFor, type Locale } from "@/lib/i18n";
@@ -73,8 +74,8 @@ export default async function BlogIndexPaginated({
       <main id="main-content" className="container mx-auto px-4 py-12">
         <Breadcrumbs
           items={[
-            { name: dict.nav.home, href: `/${locale}` },
-            { name: dict.metadata.blogTitle, href: `/${locale}/blog` },
+            homeCrumb(locale, dict),
+            blogCrumb(locale, dict),
             { name: `${dict.blog.page} ${n}` },
           ]}
         />
