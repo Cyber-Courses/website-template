@@ -39,6 +39,10 @@ const fetchPost = cache((locale: Locale, slug: string) =>
 
 const fetchAll = cache((locale: Locale) => blog.getAll({ locale }));
 
+// generateStaticParams enumerates every post; anything else 404s (no soft-404s
+// or arbitrary-URL rendering for crawlers/scrapers).
+export const dynamicParams = false;
+
 export async function generateStaticParams() {
   const all: { lang: string; slug: string }[] = [];
   for (const lang of LOCALES) {
