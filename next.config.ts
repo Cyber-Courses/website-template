@@ -109,6 +109,8 @@ async function loadRedirects(): Promise<RedirectEntry[]> {
 }
 
 const nextConfig: NextConfig = {
+  // Don't advertise the framework/version (info-leak hygiene).
+  poweredByHeader: false,
   // Trim per-page JS by tree-shaking heavy libs at import time.
   experimental: {
     optimizePackageImports: [
