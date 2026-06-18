@@ -33,6 +33,21 @@ function staticEntry(
 }
 
 /**
+ * Entity-escape a URL for inclusion in sitemap XML (sitemaps.org requires it).
+ * Next does NOT escape `<image:loc>` values, so an image URL with a query
+ * string (`?w=1600&q=80`) would otherwise emit a raw `&` and produce invalid
+ * XML ("EntityRef: expecting ';'").
+ */
+function escapeXmlUrl(url: string): string {
+  return url
+    .replace(/&/g, "&amp;")
+    .replace(/'/g, "&apos;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+/**
  * Map each post/term URL to its hero/OG image so the sitemap can carry
  * `<image:image>` entries (Google Images discovery). Built once across locales.
  */
@@ -44,7 +59,10 @@ async function buildImageMap(): Promise<Map<string, string>> {
       for (const doc of docs) {
         const image = resolveHeroImage(doc.frontmatter);
         if (image) {
-          map.set(collection.url(doc.slug, locale), toAbsoluteUrl(image));
+          map.set(
+            collection.url(doc.slug, locale),
+            escapeXmlUrl(toAbsoluteUrl(image)),
+          );
         }
       }
     }
