@@ -45,15 +45,36 @@ function attr(tag: string, name: string): string | undefined {
   return tag.match(new RegExp(`${name}=["']([^"']+)["']`, "i"))?.[1];
 }
 
+/**
+ * Fail on unescaped XML entities (a raw `&` not part of `&amp;`/`&lt;`/… or a
+ * numeric ref). This is the class of bug that breaks a sitemap with
+ * "EntityRef: expecting ';'" — typically an image/loc URL with a `&` query
+ * separator that wasn't entity-escaped.
+ */
+function checkXmlWellFormed(xml: string, source: string): void {
+  const bad = xml.match(/&(?!amp;|lt;|gt;|quot;|apos;|#\d+;|#x[0-9a-fA-F]+;)/);
+  if (bad) {
+    const at = xml.slice(Math.max(0, bad.index! - 40), bad.index! + 40);
+    errors.push({
+      url: source,
+      rule: "sitemap-xml",
+      message: `unescaped '&' (invalid XML) near: …${at.replace(/\n/g, " ")}…`,
+    });
+  }
+}
+
 async function collectSitemapUrls(): Promise<string[]> {
   const xml = await getText(`${BASE}/sitemap.xml`);
+  checkXmlWellFormed(xml, `${BASE}/sitemap.xml`);
   const locs = matchAll(xml, /<loc>([^<]+)<\/loc>/g).map(onBase);
   // Handle a sitemap index (locs pointing at more sitemaps).
   if (locs.some((l) => /sitemap.*\.xml$/i.test(l))) {
     const nested = await Promise.all(
-      locs.map(async (l) =>
-        matchAll(await getText(l), /<loc>([^<]+)<\/loc>/g).map(onBase),
-      ),
+      locs.map(async (l) => {
+        const sub = await getText(l);
+        checkXmlWellFormed(sub, l);
+        return matchAll(sub, /<loc>([^<]+)<\/loc>/g).map(onBase);
+      }),
     );
     return [...new Set(nested.flat())];
   }
