@@ -157,3 +157,20 @@
 .prose :where(code):not(:where([class~="not-prose"] *))::after {
   content: none;
 }
+
+/*
+ * Respect prefers-reduced-motion (WCAG 2.3.3): near-instantly resolve any
+ * animation/transition and disable smooth scrolling for users who opt out of
+ * motion. Applies site-wide to the theme-toggle icon swap, the reading-progress
+ * bar, tw-animate-css, and any future motion.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
