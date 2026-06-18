@@ -3,12 +3,14 @@ import type { ExtraProps } from "react-markdown";
 import { MdEmbed } from "./embed";
 
 /**
- * Paragraph override that turns a paragraph containing nothing but a single
- * bare URL into a rich oEmbed (see `MdEmbed`). GFM autolinks bare URLs to
- * `<a href="url">url</a>`, so we detect that exact shape from the hast `node`.
+ * Paragraph override that keeps the markup valid HTML5:
+ *  - a paragraph that is just a bare URL becomes a rich oEmbed (`MdEmbed`);
+ *  - an image-only paragraph is unwrapped (our `<img>`/`<figure>` is flow
+ *    content and can't legally nest inside `<p>` — react-markdown wraps lone
+ *    images in `<p>` by default).
  *
- * Returning the embed WITHOUT a `<p>` wrapper is deliberate: an <iframe>/<div>
- * nested inside <p> is invalid HTML and breaks hydration.
+ * Both cases return WITHOUT a `<p>` wrapper, which also avoids hydration
+ * mismatches from invalid nesting.
  */
 export function MdParagraph({
   node,
@@ -17,7 +19,18 @@ export function MdParagraph({
 }: ComponentProps<"p"> & ExtraProps) {
   const bareUrl = extractBareUrl(node);
   if (bareUrl) return <MdEmbed url={bareUrl} />;
+  if (isImageOnly(node)) return <>{children}</>;
   return <p {...rest}>{children}</p>;
+}
+
+/** True when the paragraph contains only image(s) and whitespace. */
+function isImageOnly(node: ExtraProps["node"]): boolean {
+  if (!node || node.children.length === 0) return false;
+  return node.children.every(
+    (c) =>
+      (c.type === "element" && c.tagName === "img") ||
+      (c.type === "text" && c.value.trim() === ""),
+  );
 }
 
 function extractBareUrl(node: ExtraProps["node"]): string | null {
