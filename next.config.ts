@@ -16,6 +16,8 @@ const withBundleAnalyzer = bundleAnalyzer({
  * two in sync. `connect-src`/`script-src` cover the optional analytics
  * providers; trim to the one you actually use.
  */
+const isDev = process.env.NODE_ENV === "development";
+
 const csp = {
   "default-src": ["'self'"],
   "base-uri": ["'self'"],
@@ -25,6 +27,8 @@ const csp = {
   "script-src": [
     "'self'",
     "'unsafe-inline'",
+    // React dev mode uses eval() to rebuild call stacks; never in production.
+    ...(isDev ? ["'unsafe-eval'"] : []),
     "https://va.vercel-scripts.com",
     "https://plausible.io",
     "https://*.umami.is",
@@ -53,7 +57,8 @@ const csp = {
     "https://geo.dailymotion.com",
     "https://www.dailymotion.com",
   ],
-  "upgrade-insecure-requests": [],
+  // Dev runs on plain http://localhost: upgrading would break every fetch.
+  ...(isDev ? {} : { "upgrade-insecure-requests": [] }),
 };
 
 const cspValue = Object.entries(csp)
