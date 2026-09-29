@@ -159,7 +159,7 @@ export default async function BlogPostPage({
         )}
 
         <div className="mt-8 grid gap-10 lg:grid-cols-[1fr_240px]">
-          <article>
+          <article className="min-w-0">
             <header className="space-y-4 mb-8">
               <h1 className="text-3xl md:text-5xl font-semibold tracking-tight">
                 {title}

@@ -34,6 +34,8 @@ export function proxy(request: NextRequest) {
     pathname === "/oembed" ||
     pathname === "/manifest.webmanifest" ||
     pathname === "/favicon.ico" ||
+    pathname === "/apple-icon" ||
+    pathname === "/opengraph-image" ||
     PUBLIC_FILE.test(pathname)
   ) {
     return;
