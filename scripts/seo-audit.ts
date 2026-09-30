@@ -9,8 +9,9 @@
  * Usage:
  *   tsx scripts/seo-audit.ts [baseUrl]      # default http://localhost:3000
  *
- * Exit code 1 on any error. Meant to run in CI against a freshly-built server
- * (see .github/workflows/seo-audit.yml).
+ * Exit code 1 on any error. Run it locally against a built server:
+ *   npm run build && npm start   # then, in another terminal:
+ *   npm run seo:audit
  */
 const BASE = (process.argv[2] ?? "http://localhost:3000").replace(/\/$/, "");
 const MAX_PAGES = Number(process.env.SEO_AUDIT_MAX_PAGES ?? 60);
