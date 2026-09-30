@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageTitle } from "@/lib/metadata";
 import { notFound } from "next/navigation";
 import { PostCard } from "@/components/post-card";
 import { Breadcrumbs } from "@/components/breadcrumbs";
@@ -33,7 +34,7 @@ export async function generateMetadata({
   return {
     ...base,
     metadataBase: new URL(siteConfig.url),
-    title: dict.metadata.blogTitle,
+    title: pageTitle(dict.metadata.blogTitle),
     description: dict.metadata.blogDescription,
     alternates: {
       canonical: `${siteConfig.url}/${lang}/blog`,

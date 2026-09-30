@@ -3,11 +3,11 @@
     "homeTitle": "Accueil",
     "homeDescription": "Un starter Next.js internationalisé optimisé pour le SEO.",
     "blogTitle": "Blog",
-    "blogDescription": "Articles, guides et nouveautés.",
+    "blogDescription": "Articles, guides et nouveautés du blog, avec de nouveaux articles sur les sujets traités par ce site, publiés dans toutes les langues prises en charge.",
     "searchTitle": "Recherche",
-    "searchDescription": "Rechercher dans le blog.",
+    "searchDescription": "Recherchez parmi tous les articles du blog de ce site par titre, résumé ou tag pour trouver rapidement l'article ou le guide voulu.",
     "sitemapTitle": "Plan du site",
-    "sitemapDescription": "Toutes les pages du site."
+    "sitemapDescription": "La liste complète des pages de ce site : la page d'accueil, le blog, la page de recherche et tous les articles publiés."
   },
   "nav": {
     "home": "Accueil",

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageTitle } from "@/lib/metadata";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { blog } from "@/next-md-blog.config";
@@ -21,7 +22,10 @@ export async function generateMetadata({
   if (!hasLocale(lang)) return {};
   const dict = await getDictionary(lang);
   return {
-    title: dict.metadata.sitemapTitle,
+    title: pageTitle(dict.metadata.sitemapTitle),
+    // Thin link hub: keep it out of the index (and the XML sitemap) but let
+    // crawlers follow its links through to the real pages.
+    robots: { index: false, follow: true },
     description: dict.metadata.sitemapDescription,
     alternates: {
       canonical: `${siteConfig.url}/${lang}/sitemap`,

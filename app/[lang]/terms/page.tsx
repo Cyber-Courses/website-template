@@ -25,7 +25,7 @@ export async function generateMetadata({
     lang,
     path: "/terms",
     title: "Terms of Service",
-    description: `The terms under which you may use ${siteConfig.name}.`,
+    description: `The terms under which you may use ${siteConfig.name}: acceptable use, intellectual property, disclaimers and limitation of liability.`,
   });
 }
 

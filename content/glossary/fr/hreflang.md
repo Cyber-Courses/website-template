@@ -1,6 +1,6 @@
 ---
 title: "hreflang"
-description: "Une annotation HTML et sitemap qui indique aux moteurs quelle URL sert quelle langue/région — le mécanisme principal de Google pour servir la bonne page selon l'audience."
+description: "Une annotation HTML et sitemap qui indique aux moteurs quelle URL sert quelle langue/région, pour que Google serve la bonne page à chaque audience."
 date: "2026-01-15"
 ---
 

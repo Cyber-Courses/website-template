@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageTitle } from "@/lib/metadata";
 import { notFound } from "next/navigation";
 import { blog } from "@/next-md-blog.config";
 import { PostCard } from "@/components/post-card";
@@ -39,7 +40,7 @@ export async function generateMetadata({
   const n = Number(page);
   const url = `${siteConfig.url}/${lang}/blog/page/${n}`;
   return {
-    title: `${dict.metadata.blogTitle} — ${dict.blog.page} ${n}`,
+    title: pageTitle(`${dict.metadata.blogTitle} — ${dict.blog.page} ${n}`),
     description: dict.metadata.blogDescription,
     alternates: {
       canonical: url,

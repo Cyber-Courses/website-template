@@ -1,6 +1,6 @@
 ---
 title: "hreflang"
-description: "Una señal HTML y de sitemap que indica a los buscadores qué URL sirve qué idioma/región — el mecanismo principal de Google para mostrar la página correcta por audiencia."
+description: "Una señal HTML y de sitemap que indica a los buscadores qué URL sirve qué idioma/región, para que Google muestre la página correcta a cada audiencia."
 date: "2026-01-15"
 ---
 

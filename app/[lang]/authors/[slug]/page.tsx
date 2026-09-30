@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageTitle } from "@/lib/metadata";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { slugifyAuthor } from "@next-md-blog/core";
@@ -47,7 +48,7 @@ export async function generateMetadata({
   const url = `${siteConfig.url}/${lang}/authors/${slug}`;
   return {
     metadataBase: new URL(siteConfig.url),
-    title: author.name,
+    title: pageTitle(author.name),
     description: author.bio ?? `Posts by ${author.name}.`,
     alternates: {
       canonical: url,

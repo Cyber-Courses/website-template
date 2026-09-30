@@ -1,6 +1,6 @@
 ---
 title: "URL canónica"
-description: "La URL que Google debe tratar como la versión maestra de una página, declarada con `<link rel=\"canonical\">` e idealmente consistente entre cabeceras HTTP, sitemap y anotaciones hreflang."
+description: "La URL que Google debe tratar como versión maestra de una página, declarada con `<link rel=\"canonical\">` y coherente con sitemap y hreflang."
 date: "2026-01-12"
 ---
 
