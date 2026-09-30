@@ -188,3 +188,18 @@
   max-width: 100%;
   overflow-x: auto;
 }
+
+/*
+ * Mobile overflow guards. Grid items default to min-width:auto, so one long
+ * title, badge row or table can push a column past the viewport; long
+ * unbreakable strings (paths, URLs, registry keys) spill out of their box.
+ * Code blocks keep white-space:pre and still scroll inside their own box.
+ */
+@layer base {
+  body {
+    overflow-wrap: break-word;
+  }
+  .grid > * {
+    min-width: 0;
+  }
+}
