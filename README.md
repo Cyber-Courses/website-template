@@ -30,7 +30,7 @@ A Next.js 16 / React 19 starter built for SEO out of the box, with a clean, toke
 | | `Content-Security-Policy` (+ embed/analytics origins) | `next.config.ts` |
 | | `apple-touch-icon` | `app/apple-icon.tsx` |
 | | `/.well-known/security.txt` (RFC 9116) | `app/.well-known/security.txt/route.ts` |
-| | CI SEO audit: canonical / JSON-LD / hreflang reciprocity + Lighthouse | `scripts/seo-audit.ts`, `.lighthouserc.json`, `.github/workflows/seo-audit.yml` |
+| | On-demand SEO audit: canonical / JSON-LD / hreflang reciprocity (`npm run seo:audit`) | `scripts/seo-audit.ts` |
 | | Pagination metadata | `rel="prev"/"next"` in `[lang]/blog/page/[page]/page.tsx` |
 | | Per-locale RSS feed `<link rel="alternate">` | `[lang]/layout.tsx` metadata |
 | | `llms.txt` + `llms-full.txt` (llmstxt.org spec) | `app/llms.txt/route.ts`, `app/llms-full.txt/route.ts` |
