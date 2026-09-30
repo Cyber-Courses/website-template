@@ -5,6 +5,8 @@ import Image from "next/image";
 import { cache } from "react";
 import rehypeSlug from "rehype-slug";
 import { MarkdownContent, authorNamesFromFrontmatter } from "@next-md-blog/core";
+import { AuthorAvatar } from "@/components/author-avatar";
+import { authorHref, resolveAuthorByName } from "@/lib/authors";
 
 import { blog } from "@/next-md-blog.config";
 import { collectVideoObjects } from "@/lib/oembed/video-schema";
@@ -102,6 +104,8 @@ export default async function BlogPostPage({
   const updated = fmString(fm, "updated");
   const tags = fmStringArray(fm, "tags");
   const headings = extractHeadings(post.content);
+  const authorName = authorNamesFromFrontmatter(fm)[0];
+  const author = resolveAuthorByName(authorName);
 
   const related = relatedPosts(post, await fetchAll(locale));
   const series = await resolveSeries(post, locale);
@@ -167,7 +171,26 @@ export default async function BlogPostPage({
               {description && (
                 <p className="text-lg text-muted-foreground">{description}</p>
               )}
-              <div className="text-sm text-muted-foreground flex flex-wrap gap-x-4 gap-y-2 items-center">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-3 text-sm text-muted-foreground">
+                {(author || authorName) && (
+                  <div className="flex items-center gap-2.5">
+                    <AuthorAvatar name={author?.name ?? authorName!} src={author?.avatar} size={32} />
+                    <span>
+                      {dict.blog.byAuthor}{" "}
+                      {author ? (
+                        <Link
+                          href={authorHref(locale, author.slug)}
+                          rel="author"
+                          className="font-medium text-foreground hover:underline underline-offset-4"
+                        >
+                          {author.name}
+                        </Link>
+                      ) : (
+                        <span className="font-medium text-foreground">{authorName}</span>
+                      )}
+                    </span>
+                  </div>
+                )}
                 {date && (
                   <span>
                     {dict.blog.publishedOn}{" "}

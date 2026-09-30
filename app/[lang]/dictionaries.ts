@@ -16,8 +16,24 @@ export type Dictionary = {
     sitemapTitle: string;
     sitemapDescription: string;
   };
-  nav: { home: string; blog: string; search: string };
+  nav: {
+    home: string;
+    blog: string;
+    search: string;
+    contact: string;
+    menu: string;
+  };
   glossary: { title: string; intro: string };
+  authors: {
+    title: string;
+    description: string;
+    latestArticles: string;
+    article: string;
+    articles: string;
+    expertise: string;
+    website: string;
+    viewProfile: string;
+  };
   toggleTheme: string;
   footer: { rights: string; sitemap: string; rss: string };
   blog: {
@@ -40,7 +56,12 @@ export type Dictionary = {
   tag: { title: string; back: string };
   search: { placeholder: string; noResults: string };
   notFound: { title: string; cta: string };
-  home: { heading: string; subheading: string; readBlog: string };
+  home: {
+    heading: string;
+    subheading: string;
+    readBlog: string;
+    eyebrow: string;
+  };
 };
 
 const loaders: Record<Locale, () => Promise<Dictionary>> = {

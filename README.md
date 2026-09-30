@@ -1,6 +1,6 @@
 # SEO-First i18n Next.js Template
 
-A Next.js 16 / React 19 starter built for SEO out of the box, using only shadcn defaults for design and `@next-md-blog/core` for the blog. Multilingual by default (English, French, Spanish, German) with full hreflang.
+A Next.js 16 / React 19 starter built for SEO out of the box, with a clean, token-based design system (Tailwind CSS v4 + shadcn/ui — see [DESIGN.md](DESIGN.md)) and `@next-md-blog/core` for the blog. Multilingual by default (English, French, Spanish, German) with full hreflang.
 
 ## What's wired up
 
@@ -15,7 +15,7 @@ A Next.js 16 / React 19 starter built for SEO out of the box, using only shadcn 
 | | Yoast-style `twitter:label1/2` (author + est. reading time) | `lib/seo.ts` `articleTwitterLabels()` |
 | | oEmbed provider endpoint + `<link rel="alternate" type="application/json+oembed">` discovery | `app/oembed/route.ts`, `lib/oembed/resolve.ts` |
 | | oEmbed consumer — bare URLs → rich embeds (YouTube, Vimeo, Spotify, …) | `components/markdown/{p,embed}.tsx`, `lib/oembed/*` |
-| | Dynamic OG image per post (year-long cache) | `app/[lang]/blog/[slug]/opengraph-image.tsx` |
+| | Branded dynamic OG image per post/locale (year-long cache) | `lib/og.tsx`, `app/[lang]/blog/[slug]/opengraph-image.tsx` |
 | | Hreflang on every translated page | sitemap + per-page `alternates.languages` |
 | | JSON-LD: Organization + BlogPosting + Breadcrumb (`@graph`) | `generateBlogPostSchemaGraph` |
 | | JSON-LD: WebSite + SearchAction (site-wide) | `components/seo/website-jsonld.tsx` |
@@ -43,7 +43,7 @@ A Next.js 16 / React 19 starter built for SEO out of the box, using only shadcn 
 | | HTML sitemap | `app/[lang]/sitemap/page.tsx` |
 | **Content** | Blog engine + per-locale posts | `@next-md-blog/core`, `posts/{locale}/*` |
 | | Tag pages with `CollectionPage` JSON-LD | `app/[lang]/blog/tags/[tag]/page.tsx` |
-| | Author pages + `Person` JSON-LD | `app/[lang]/authors/[slug]/page.tsx` |
+| | Authors index + profile pages (`Person` JSON-LD, avatar/initials, profile links) and post bylines | `app/[lang]/authors/`, `lib/authors.ts` |
 | | **Topic clusters** via `series` frontmatter + pillar pages | `lib/series.ts`, `app/[lang]/topics/[series]/page.tsx`, banner on `[slug]` |
 | | Related articles (tag overlap, top 3) | `[slug]/page.tsx` |
 | | Auto TOC + auto-anchor IDs | `lib/toc.ts` + `rehype-slug` |
@@ -55,7 +55,7 @@ A Next.js 16 / React 19 starter built for SEO out of the box, using only shadcn 
 | | Per-image real dimensions (CLS = 0) | `lib/image-dims.ts` + `components/markdown/img.tsx` |
 | | Cache-Control on RSS (`max-age=3600, swr=86400`) and OG (`immutable, 1y`) | route handlers |
 | | AVIF/WebP image optimization | `next.config.ts` `images.formats` |
-| | `next/font` Geist | `[lang]/layout.tsx` |
+| | `next/font` Inter + JetBrains Mono | `lib/fonts.ts` |
 | | Stable scrollbar gutter (CLS) | `globals.css` |
 | **Crawlability** | `robots.txt` | `app/robots.ts` |
 | | Per-page `noindex` via frontmatter | `@next-md-blog/core` |

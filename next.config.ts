@@ -132,6 +132,10 @@ const nextConfig: NextConfig = {
   // in: set `cacheComponents: true`, mark every page-level loader with
   // `use cache`, replace `export const revalidate = N` with `cacheLife()`,
   // and ensure every `generateStaticParams` returns ≥1 entry.
+  // OG image routes read Inter from disk (lib/og.tsx) — ship the files.
+  outputFileTracingIncludes: {
+    "/**": ["./assets/fonts/*.woff"],
+  },
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [{ protocol: "https", hostname: "**" }],
