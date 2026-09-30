@@ -12,7 +12,9 @@
   "nav": {
     "home": "Accueil",
     "blog": "Blog",
-    "search": "Recherche"
+    "search": "Recherche",
+    "contact": "Contact",
+    "menu": "Menu"
   },
   "toggleTheme": "Changer de thème",
   "footer": {
@@ -51,11 +53,22 @@
   },
   "home": {
     "heading": "Un template Next.js orienté SEO.",
-    "subheading": "Les défauts shadcn. @next-md-blog/core. Multilingue dès le départ.",
-    "readBlog": "Lire le blog"
+    "subheading": "Un design system Tailwind + shadcn/ui épuré, un blog Markdown et un SEO multilingue — prêts à personnaliser.",
+    "readBlog": "Lire le blog",
+    "eyebrow": "Next.js 16 · Tailwind CSS v4 · shadcn/ui"
   },
   "glossary": {
     "title": "Glossaire",
     "intro": "Des définitions claires des termes utilisés sur ce site."
+  },
+  "authors": {
+    "title": "Auteurs",
+    "description": "Découvrez les personnes qui écrivent pour ce site : leur parcours, leurs domaines d’expertise et leurs derniers articles.",
+    "latestArticles": "Derniers articles",
+    "article": "article",
+    "articles": "articles",
+    "expertise": "Expertise",
+    "website": "Site web",
+    "viewProfile": "Voir le profil"
   }
 }

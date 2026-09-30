@@ -12,7 +12,9 @@
   "nav": {
     "home": "Home",
     "blog": "Blog",
-    "search": "Search"
+    "search": "Search",
+    "contact": "Contact",
+    "menu": "Menu"
   },
   "toggleTheme": "Toggle theme",
   "footer": {
@@ -51,11 +53,22 @@
   },
   "home": {
     "heading": "An SEO-first Next.js template.",
-    "subheading": "shadcn defaults. @next-md-blog/core. Multilingual out of the box.",
-    "readBlog": "Read the blog"
+    "subheading": "A clean Tailwind + shadcn/ui design system, a Markdown blog and multilingual SEO — ready to make your own.",
+    "readBlog": "Read the blog",
+    "eyebrow": "Next.js 16 · Tailwind CSS v4 · shadcn/ui"
   },
   "glossary": {
     "title": "Glossary",
     "intro": "Plain-language definitions of the terms used across this site."
+  },
+  "authors": {
+    "title": "Authors",
+    "description": "Meet the people who write for this site: their background, areas of expertise and latest articles.",
+    "latestArticles": "Latest articles",
+    "article": "article",
+    "articles": "articles",
+    "expertise": "Expertise",
+    "website": "Website",
+    "viewProfile": "View profile"
   }
 }

@@ -8,7 +8,9 @@ import {
   localeNames,
   type Locale,
 } from "@/lib/i18n";
-import { Geist, Geist_Mono } from "next/font/google";
+import { fontVariables } from "@/lib/fonts";
+import { LogoMark } from "@/components/brand/logo";
+import { buttonVariants } from "@/components/ui/button";
 import "./globals.css";
 
 /**
@@ -20,8 +22,6 @@ import "./globals.css";
  * intended language for an orphan path), with a locale switcher so the
  * user can land somewhere useful in their language.
  */
-const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
-const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
 const COPY: Record<Locale, { heading: string; description: string; home: string }> =
   {
@@ -57,10 +57,11 @@ export default function RootNotFound() {
   return (
     <html
       lang={DEFAULT_LOCALE}
-      className={`${geistSans.variable} ${geistMono.variable}`}
+      className={fontVariables}
     >
       <body className="min-h-screen bg-background text-foreground antialiased">
         <main className="mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center gap-6 px-6 py-16 text-center">
+          <LogoMark className="size-10" />
           <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
             404
           </p>
@@ -68,10 +69,7 @@ export default function RootNotFound() {
             {t.heading}
           </h1>
           <p className="max-w-prose text-muted-foreground">{t.description}</p>
-          <Link
-            href={`/${DEFAULT_LOCALE}`}
-            className="rounded-md bg-primary px-5 py-2 text-sm font-medium text-primary-foreground"
-          >
+          <Link href={`/${DEFAULT_LOCALE}`} className={buttonVariants({ size: "lg" })}>
             {t.home}
           </Link>
           <nav

@@ -5,6 +5,7 @@ import { siteConfig } from "@/site.config";
 import { LOCALES, DEFAULT_LOCALE, hreflangFor } from "@/lib/i18n";
 import { toAbsoluteUrl } from "@/lib/url";
 import { resolveHeroImage } from "@/lib/frontmatter";
+import { getPublishedAuthors } from "@/lib/authors";
 
 /*
  * Google caps a single sitemap at 50,000 URLs / 50 MB. When you grow past
@@ -18,7 +19,7 @@ import { resolveHeroImage } from "@/lib/frontmatter";
  * `noindex, follow`, and a noindex URL in the XML sitemap is a contradictory
  * signal (Search Console flags it), so they stay out.
  */
-const STATIC_PATHS = ["", "/blog", "/glossary"];
+const STATIC_PATHS = ["", "/blog", "/glossary", "/authors"];
 
 function staticEntry(
   path: string,
@@ -76,9 +77,13 @@ async function buildImageMap(): Promise<Map<string, string>> {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const staticEntries = STATIC_PATHS.map((p) =>
-    staticEntry(p, p === "" ? "daily" : "weekly", p === "" ? 1 : 0.7),
-  );
+  const authorPaths = (await getPublishedAuthors()).map((a) => `/authors/${a.slug}`);
+  const staticEntries = [
+    ...STATIC_PATHS.map((p) =>
+      staticEntry(p, p === "" ? "daily" : "weekly", p === "" ? 1 : 0.7),
+    ),
+    ...authorPaths.map((p) => staticEntry(p, "monthly", 0.5)),
+  ];
   const [entries, imageMap] = await Promise.all([
     composeSitemap({
       collections: [blog, glossary],

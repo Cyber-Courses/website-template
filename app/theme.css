@@ -1,0 +1,144 @@
+/*
+ * ─────────────────────────────────────────────────────────────────────────────
+ *  THEME — the one file to edit to rebrand the site.
+ * ─────────────────────────────────────────────────────────────────────────────
+ *
+ *  Three layers, each built only from the one above it:
+ *
+ *   1. Palettes   --brand-*, --base-*   → point at a Tailwind color scale.
+ *   2. Semantic   --primary, --border…  → what components use (shadcn contract).
+ *   3. Utilities  bg-primary, text-muted-foreground…  (wired in globals.css).
+ *
+ *  Quick recipes
+ *   • New brand color:  replace `indigo` below with any Tailwind scale
+ *                       (violet, blue, emerald, rose, orange…).
+ *   • Warmer/cooler UI: replace `zinc` with neutral, slate, gray or stone.
+ *   • Rounder/sharper:  change --radius (0 = square, 1rem = pill-ish).
+ *   • Fonts:            lib/fonts.ts.
+ *   • Logo / favicon / OG colors: lib/brand.ts (mirror the hex values).
+ *
+ *  Components should only ever use semantic tokens (bg-primary, text-muted-
+ *  foreground, border…) or the brand scale (bg-brand-50) — never raw palette
+ *  classes like bg-indigo-600 — so a palette swap here restyles everything.
+ */
+
+:root {
+  /* 1. Palettes ------------------------------------------------------------ */
+  --brand-50: var(--color-indigo-50);
+  --brand-100: var(--color-indigo-100);
+  --brand-200: var(--color-indigo-200);
+  --brand-300: var(--color-indigo-300);
+  --brand-400: var(--color-indigo-400);
+  --brand-500: var(--color-indigo-500);
+  --brand-600: var(--color-indigo-600);
+  --brand-700: var(--color-indigo-700);
+  --brand-800: var(--color-indigo-800);
+  --brand-900: var(--color-indigo-900);
+  --brand-950: var(--color-indigo-950);
+
+  --base-50: var(--color-zinc-50);
+  --base-100: var(--color-zinc-100);
+  --base-200: var(--color-zinc-200);
+  --base-300: var(--color-zinc-300);
+  --base-400: var(--color-zinc-400);
+  --base-500: var(--color-zinc-500);
+  --base-600: var(--color-zinc-600);
+  --base-700: var(--color-zinc-700);
+  --base-800: var(--color-zinc-800);
+  --base-900: var(--color-zinc-900);
+  --base-950: var(--color-zinc-950);
+
+  /* Shape, layout & type */
+  --radius: 0.625rem;
+  /* Max width of `.container` (header, pages, footer). */
+  --content-width: 72rem;
+  /* Inter character variants: open 4/6/9 and a single-storey "a". Set to
+     `normal` if you switch to a font without them. */
+  --font-features: "cv02", "cv03", "cv04", "cv11";
+
+  /* 2. Semantic tokens — light --------------------------------------------- */
+  --background: var(--color-white);
+  --foreground: var(--base-950);
+  /* Subtle alternate section background (feature bands, footers). */
+  --surface: var(--base-50);
+
+  --card: var(--color-white);
+  --card-foreground: var(--base-950);
+  --popover: var(--color-white);
+  --popover-foreground: var(--base-950);
+
+  --primary: var(--brand-600);
+  --primary-foreground: var(--color-white);
+  --secondary: var(--base-100);
+  --secondary-foreground: var(--base-900);
+  --muted: var(--base-100);
+  --muted-foreground: var(--base-500);
+  --accent: var(--base-100);
+  --accent-foreground: var(--base-900);
+
+  /* Inline text links (prose, "link" buttons). */
+  --link: var(--brand-600);
+
+  --destructive: var(--color-red-600);
+  --success: var(--color-emerald-600);
+  --warning: var(--color-amber-500);
+  --info: var(--color-sky-600);
+
+  --border: var(--base-200);
+  --input: var(--base-200);
+  --ring: var(--brand-500);
+
+  --chart-1: var(--brand-500);
+  --chart-2: var(--color-sky-500);
+  --chart-3: var(--color-emerald-500);
+  --chart-4: var(--color-amber-500);
+  --chart-5: var(--color-rose-500);
+
+  --sidebar: var(--base-50);
+  --sidebar-foreground: var(--base-950);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: var(--base-100);
+  --sidebar-accent-foreground: var(--base-900);
+  --sidebar-border: var(--base-200);
+  --sidebar-ring: var(--ring);
+}
+
+/* 2b. Semantic tokens — dark ---------------------------------------------- */
+.dark {
+  --background: var(--base-950);
+  --foreground: var(--base-50);
+  --surface: var(--base-900);
+
+  --card: var(--base-900);
+  --card-foreground: var(--base-50);
+  --popover: var(--base-900);
+  --popover-foreground: var(--base-50);
+
+  /* 600 keeps white button text above 4.5:1 in both modes. */
+  --primary: var(--brand-600);
+  --primary-foreground: var(--color-white);
+  --secondary: var(--base-800);
+  --secondary-foreground: var(--base-50);
+  --muted: var(--base-800);
+  --muted-foreground: var(--base-400);
+  --accent: var(--base-800);
+  --accent-foreground: var(--base-50);
+
+  --link: var(--brand-400);
+
+  --destructive: var(--color-red-500);
+  --success: var(--color-emerald-500);
+  --warning: var(--color-amber-400);
+  --info: var(--color-sky-400);
+
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: var(--brand-400);
+
+  --sidebar: var(--base-900);
+  --sidebar-foreground: var(--base-50);
+  --sidebar-accent: var(--base-800);
+  --sidebar-accent-foreground: var(--base-50);
+  --sidebar-border: oklch(1 0 0 / 10%);
+}

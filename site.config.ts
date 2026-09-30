@@ -32,6 +32,9 @@ export const siteConfig = {
       name: "Your Name",
       url: "https://example.com",
       twitter: "@your_handle",
+      // Square photo (local path under /public or absolute URL). Without one,
+      // initials on a brand tint are shown.
+      avatar: undefined as string | undefined,
       // E-E-A-T signals (Person JSON-LD). All optional but high-value for
       // authority: who the author is, what they're expert in, and verifiable
       // profiles. `sameAs` is merged with url/twitter/github automatically.
@@ -47,7 +50,8 @@ export const siteConfig = {
   defaultOgImage: "/opengraph-image",
   organization: {
     legalName: "Your Company, Inc.",
-    logo: "/icon",
+    // Raster (PNG) logo — Google requires a bitmap ≥112px for Organization.
+    logo: "/apple-icon",
     foundingDate: "2020-01-01",
     founder: "Your Name",
     // Optional but high-impact: populate this once you have a Wikidata entity.

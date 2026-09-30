@@ -1,5 +1,9 @@
 "use client";
 
+import { fontVariables } from "@/lib/fonts";
+import { buttonVariants } from "@/components/ui/button";
+import "./globals.css";
+
 /**
  * Root error boundary — catches errors thrown in the root layout itself
  * (where the locale-segment error.tsx can't). Must render its own <html>/<body>.
@@ -11,35 +15,13 @@ export default function GlobalError({
   reset: () => void;
 }) {
   return (
-    <html lang="en">
-      <body
-        style={{
-          minHeight: "100vh",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: "1rem",
-          fontFamily: "system-ui, sans-serif",
-          padding: "2rem",
-          textAlign: "center",
-        }}
-      >
-        <h1 style={{ fontSize: "1.5rem", fontWeight: 600 }}>
-          Something went wrong
-        </h1>
-        <p style={{ color: "#666" }}>
+    <html lang="en" className={fontVariables}>
+      <body className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background p-8 text-center text-foreground antialiased">
+        <h1 className="text-2xl font-semibold tracking-tight">Something went wrong</h1>
+        <p className="text-muted-foreground">
           An unexpected error occurred. Please try again.
         </p>
-        <button
-          onClick={reset}
-          style={{
-            padding: "0.5rem 1rem",
-            borderRadius: "0.375rem",
-            border: "1px solid #ccc",
-            cursor: "pointer",
-          }}
-        >
+        <button onClick={reset} className={buttonVariants({ variant: "outline" })}>
           Try again
         </button>
       </body>

@@ -11,9 +11,9 @@ const ICONS: Record<Variant, typeof Info> = {
 };
 
 const STYLES: Record<Variant, string> = {
-  info: "border-l-blue-500/60 bg-blue-500/5",
-  warn: "border-l-amber-500/60 bg-amber-500/5",
-  tip: "border-l-emerald-500/60 bg-emerald-500/5",
+  info: "border-info/25 bg-info/5 [&>svg]:text-info",
+  warn: "border-warning/30 bg-warning/5 [&>svg]:text-warning",
+  tip: "border-success/25 bg-success/5 [&>svg]:text-success",
 };
 
 export function Callout({
@@ -30,7 +30,7 @@ export function Callout({
     <aside
       role="note"
       className={cn(
-        "my-6 border-l-4 rounded-r-md px-4 py-3 flex gap-3 items-start",
+        "my-6 flex items-start gap-3 rounded-lg border px-4 py-3 text-sm",
         STYLES[variant],
       )}
     >
