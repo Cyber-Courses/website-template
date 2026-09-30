@@ -23,10 +23,11 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { lang } = await params;
   if (!hasLocale(lang)) return {};
+  const dict = await getDictionary(lang);
   return {
     metadataBase: new URL(siteConfig.url),
-    title: "Glossary",
-    description: "Plain-language definitions of SEO terms.",
+    title: dict.glossary.title,
+    description: dict.glossary.intro,
     alternates: {
       canonical: `${siteConfig.url}/${lang}/glossary`,
       languages: hreflangFor(siteConfig.url, "/glossary"),
@@ -50,20 +51,20 @@ export default async function GlossaryIndex({
     <>
       <CollectionJsonLd
         url={url}
-        name="Glossary"
-        description="Plain-language definitions of SEO terms."
+        name={dict.glossary.title}
+        description={dict.glossary.intro}
         inLanguage={locale}
         items={toCollectionItems(terms, glossary, locale)}
       />
       <main id="main-content" className="container mx-auto px-4 py-12 max-w-3xl">
         <Breadcrumbs
-          items={[homeCrumb(locale, dict), { name: "Glossary" }]}
+          items={[homeCrumb(locale, dict), { name: dict.glossary.title }]}
         />
         <h1 className="mt-4 text-3xl md:text-4xl font-semibold tracking-tight">
-          Glossary
+          {dict.glossary.title}
         </h1>
         <p className="mt-2 text-muted-foreground">
-          Plain-language definitions of SEO terms used across the blog.
+          {dict.glossary.intro}
         </p>
         <dl className="mt-10 space-y-6">
           {terms.map((term) => (

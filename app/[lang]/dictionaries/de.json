@@ -53,5 +53,9 @@
     "heading": "Eine SEO-orientierte Next.js-Vorlage.",
     "subheading": "shadcn-Standards. @next-md-blog/core. Mehrsprachig von Haus aus.",
     "readBlog": "Zum Blog"
+  },
+  "glossary": {
+    "title": "Glossar",
+    "intro": "Verständliche Erklärungen der Begriffe, die auf dieser Website verwendet werden."
   }
 }

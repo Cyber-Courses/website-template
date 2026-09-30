@@ -53,5 +53,9 @@
     "heading": "Una plantilla Next.js centrada en SEO.",
     "subheading": "Por defecto shadcn. @next-md-blog/core. Multilingüe desde el principio.",
     "readBlog": "Leer el blog"
+  },
+  "glossary": {
+    "title": "Glosario",
+    "intro": "Definiciones claras de los términos que se usan en este sitio."
   }
 }
