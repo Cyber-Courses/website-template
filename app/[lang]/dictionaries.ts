@@ -17,6 +17,7 @@ export type Dictionary = {
     sitemapDescription: string;
   };
   nav: { home: string; blog: string; search: string };
+  glossary: { title: string; intro: string };
   toggleTheme: string;
   footer: { rights: string; sitemap: string; rss: string };
   blog: {
