@@ -1,6 +1,6 @@
 ---
 title: "Canonical URL"
-description: "The URL Google should treat as the master version of a page, declared via `<link rel=\"canonical\">` and (ideally) consistent across HTTP headers, sitemap, and hreflang annotations."
+description: "The URL Google should treat as a page's master version, declared via `<link rel=\"canonical\">` and consistent with headers, sitemap and hreflang."
 date: "2026-01-12"
 ---
 

@@ -3,11 +3,11 @@
     "homeTitle": "Inicio",
     "homeDescription": "Plantilla Next.js internacionalizada y optimizada para SEO.",
     "blogTitle": "Blog",
-    "blogDescription": "Artículos, guías y novedades.",
+    "blogDescription": "Artículos, guías y novedades del blog, con nuevas publicaciones sobre los temas de este sitio, disponibles en todos los idiomas admitidos.",
     "searchTitle": "Búsqueda",
-    "searchDescription": "Buscar en el blog.",
+    "searchDescription": "Busca en todos los artículos del blog de este sitio por título, resumen o etiqueta para encontrar rápidamente el artículo o la guía que necesitas.",
     "sitemapTitle": "Mapa del sitio",
-    "sitemapDescription": "Todas las páginas del sitio."
+    "sitemapDescription": "La lista completa de las páginas de este sitio: la página de inicio, el blog, la página de búsqueda y todos los artículos publicados."
   },
   "nav": {
     "home": "Inicio",

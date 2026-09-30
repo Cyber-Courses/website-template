@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { clampDescription, pageTitle } from "@/lib/metadata";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { ContentMetadata } from "@next-md-blog/core";
@@ -54,8 +55,10 @@ export async function generateMetadata({
   const url = `${siteConfig.url}/${lang}/topics/${series}`;
   return {
     metadataBase: new URL(siteConfig.url),
-    title,
-    description: `All posts in the "${title}" series.`,
+    title: pageTitle(title),
+    description: clampDescription(
+      `All posts in the "${title}" series on ${siteConfig.name}, in reading order, each with a short summary and a link to the full guide.`,
+    ),
     alternates: {
       canonical: url,
       languages: hreflangFor(siteConfig.url, `/topics/${series}`),

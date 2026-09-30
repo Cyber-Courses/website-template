@@ -1,6 +1,6 @@
 ---
 title: "hreflang"
-description: "Eine HTML- und Sitemap-Annotation, die Suchmaschinen sagt, welche URL welche Sprache/Region bedient — Googles Hauptmechanismus, um pro Zielgruppe die richtige Seite zu ranken."
+description: "Eine HTML- und Sitemap-Annotation, die Suchmaschinen sagt, welche URL welche Sprache/Region bedient — so rankt Google die richtige Seite pro Zielgruppe."
 date: "2026-01-15"
 ---
 

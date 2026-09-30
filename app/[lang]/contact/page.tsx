@@ -25,7 +25,7 @@ export async function generateMetadata({
     lang,
     path: "/contact",
     title: "Contact",
-    description: `Get in touch with ${siteConfig.name}.`,
+    description: `Contact the ${siteConfig.name} team: questions, bug reports, parsing issues, feature requests and feedback about the tool and its guides.`,
   });
 }
 

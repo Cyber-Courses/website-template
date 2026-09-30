@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { clampDescription, pageTitle } from "@/lib/metadata";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PostCard } from "@/components/post-card";
@@ -39,8 +40,10 @@ export async function generateMetadata({
   const dict = await getDictionary(locale);
   const decoded = decodeURIComponent(tag);
   return {
-    title: `${dict.tag.title} "${decoded}"`,
-    description: `${dict.tag.title} ${decoded}.`,
+    title: pageTitle(`${dict.tag.title} "${decoded}"`),
+    description: clampDescription(
+      `${dict.tag.title} ${decoded}. ${dict.metadata.blogDescription}`,
+    ),
     alternates: {
       canonical: `${siteConfig.url}/${lang}/blog/tags/${tag}`,
     },

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageTitle } from "@/lib/metadata";
 import { notFound } from "next/navigation";
 import { blog } from "@/next-md-blog.config";
 import { siteConfig } from "@/site.config";
@@ -21,7 +22,7 @@ export async function generateMetadata({
   if (!hasLocale(lang)) return {};
   const dict = await getDictionary(lang);
   return {
-    title: dict.metadata.searchTitle,
+    title: pageTitle(dict.metadata.searchTitle),
     description: dict.metadata.searchDescription,
     alternates: {
       canonical: `${siteConfig.url}/${lang}/search`,

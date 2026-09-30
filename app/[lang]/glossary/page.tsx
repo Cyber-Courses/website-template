@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageTitle } from "@/lib/metadata";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Breadcrumbs } from "@/components/breadcrumbs";
@@ -26,7 +27,7 @@ export async function generateMetadata({
   const dict = await getDictionary(lang);
   return {
     metadataBase: new URL(siteConfig.url),
-    title: dict.glossary.title,
+    title: pageTitle(dict.glossary.title),
     description: dict.glossary.intro,
     alternates: {
       canonical: `${siteConfig.url}/${lang}/glossary`,

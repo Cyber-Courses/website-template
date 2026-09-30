@@ -13,7 +13,12 @@ import { resolveHeroImage } from "@/lib/frontmatter";
  * /sitemap/<id>.xml.
  */
 
-const STATIC_PATHS = ["", "/blog", "/glossary", "/search", "/sitemap"];
+/*
+ * Indexable static routes only. /search and /sitemap (the HTML sitemap) are
+ * `noindex, follow`, and a noindex URL in the XML sitemap is a contradictory
+ * signal (Search Console flags it), so they stay out.
+ */
+const STATIC_PATHS = ["", "/blog", "/glossary"];
 
 function staticEntry(
   path: string,

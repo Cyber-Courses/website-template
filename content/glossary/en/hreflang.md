@@ -1,6 +1,6 @@
 ---
 title: "hreflang"
-description: "An HTML and sitemap signal that tells search engines which URL serves which language/region — Google's primary mechanism for ranking the right page per audience."
+description: "An HTML and sitemap signal telling search engines which URL serves which language/region, so Google can rank the right page for each audience."
 date: "2026-01-15"
 ---
 

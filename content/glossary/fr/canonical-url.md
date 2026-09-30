@@ -1,6 +1,6 @@
 ---
 title: "URL canonique"
-description: "L'URL que Google doit considérer comme la version principale d'une page, déclarée via `<link rel=\"canonical\">` et idéalement cohérente entre en-têtes HTTP, sitemap et annotations hreflang."
+description: "L'URL que Google doit traiter comme version principale d'une page, déclarée via `<link rel=\"canonical\">` et cohérente avec sitemap et hreflang."
 date: "2026-01-12"
 ---
 

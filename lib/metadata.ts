@@ -5,6 +5,39 @@ import { LOCALES, DEFAULT_LOCALE, hreflangFor, type Locale } from "@/lib/i18n";
 import { toIsoDateTime } from "@/lib/schema-dates";
 import { oembedDiscoveryTypes } from "@/lib/oembed/resolve";
 
+/** Google truncates SERP titles around 60 characters. */
+export const MAX_TITLE_LENGTH = 60;
+
+/**
+ * Render a page title with the ` | Site Name` suffix only when the result
+ * still fits in {@link MAX_TITLE_LENGTH}; otherwise return the bare title so
+ * the primary keyword isn't pushed past the SERP cut-off.
+ */
+export function fitTitle(title: string, siteName: string = siteConfig.name): string {
+  const suffixed = `${title} | ${siteName}`;
+  return suffixed.length <= MAX_TITLE_LENGTH ? suffixed : title;
+}
+
+/**
+ * `Metadata["title"]` for a page under the `[lang]` layout: an absolute title
+ * (bypassing the layout's `%s | Site` template) built with {@link fitTitle}.
+ */
+export function pageTitle(title: string): { absolute: string } {
+  return { absolute: fitTitle(title) };
+}
+
+/**
+ * Clamp a meta description to Google's ~160-char snippet width, cutting at a
+ * word boundary and adding an ellipsis when it has to shorten.
+ */
+export function clampDescription(text: string, max = 160): string {
+  const clean = text.replace(/\s+/g, " ").trim();
+  if (clean.length <= max) return clean;
+  const cut = clean.slice(0, max - 1);
+  const space = cut.lastIndexOf(" ");
+  return `${(space > max * 0.6 ? cut.slice(0, space) : cut).replace(/[\s,;:.–—-]+$/, "")}…`;
+}
+
 type Robots = NonNullable<Metadata["robots"]>;
 type AlternateTypes = NonNullable<NonNullable<Metadata["alternates"]>["types"]>;
 
@@ -94,8 +127,8 @@ export function staticPageMetadata(opts: {
   const url = `${siteConfig.url}/${opts.lang}${opts.path}`;
   return {
     metadataBase: new URL(siteConfig.url),
-    title: opts.title,
-    description: opts.description,
+    title: pageTitle(opts.title),
+    description: clampDescription(opts.description),
     alternates: {
       canonical: url,
       languages: hreflangFor(siteConfig.url, opts.path),
@@ -126,9 +159,11 @@ export async function buildDocumentMetadata(opts: {
 
   const meta = await collection.metadata(doc, {
     locale,
-    titleTemplate: "absolute",
+    titleTemplate: "bare",
     alternateLanguages: languages,
   });
+  // Suffix with the site name only when it still fits in ~60 chars.
+  meta.title = { absolute: fitTitle(String(meta.title)) };
 
   // Give OG article times a timezone (Google flags bare dates).
   const og = meta.openGraph as
