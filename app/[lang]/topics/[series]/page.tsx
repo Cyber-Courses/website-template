@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { clampDescription, pageTitle } from "@/lib/metadata";
+import { clampDescription, pageTitle, socialMetadata } from "@/lib/metadata";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { ContentMetadata } from "@next-md-blog/core";
@@ -12,7 +12,8 @@ import { toCollectionItems } from "@/lib/collection";
 import { CollectionJsonLd } from "@/components/seo/collection-jsonld";
 import { blog } from "@/next-md-blog.config";
 import { siteConfig } from "@/site.config";
-import { LOCALES, hreflangFor, type Locale } from "@/lib/i18n";
+import { LOCALES, type Locale } from "@/lib/i18n";
+import { seriesHreflang } from "@/lib/series";
 import { getDictionary, hasLocale } from "../../dictionaries";
 
 type Params = { lang: string; series: string };
@@ -53,17 +54,18 @@ export async function generateMetadata({
   const posts = await blog.getBySeries(series, { locale });
   const title = seriesTitleFromPosts(posts, series);
   const url = `${siteConfig.url}/${lang}/topics/${series}`;
+  const description = clampDescription(
+    `All posts in the "${title}" series on ${siteConfig.name}, in reading order, each with a short summary and a link to the full guide.`,
+  );
   return {
     metadataBase: new URL(siteConfig.url),
     title: pageTitle(title),
-    description: clampDescription(
-      `All posts in the "${title}" series on ${siteConfig.name}, in reading order, each with a short summary and a link to the full guide.`,
-    ),
+    description,
     alternates: {
       canonical: url,
-      languages: hreflangFor(siteConfig.url, `/topics/${series}`),
+      languages: await seriesHreflang(series),
     },
-    openGraph: { type: "website", url, title },
+    ...socialMetadata({ lang: locale, url, title, description }),
   };
 }
 

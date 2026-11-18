@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { pageTitle } from "@/lib/metadata";
+import { feedDiscoveryTypes, pageTitle, socialMetadata } from "@/lib/metadata";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Breadcrumbs } from "@/components/breadcrumbs";
@@ -32,7 +32,14 @@ export async function generateMetadata({
     alternates: {
       canonical: `${siteConfig.url}/${lang}/glossary`,
       languages: hreflangFor(siteConfig.url, "/glossary"),
+      types: feedDiscoveryTypes(lang),
     },
+    ...socialMetadata({
+      lang,
+      url: `${siteConfig.url}/${lang}/glossary`,
+      title: dict.glossary.title,
+      description: dict.glossary.intro,
+    }),
   };
 }
 

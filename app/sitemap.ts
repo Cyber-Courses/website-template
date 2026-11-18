@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import type { ContentMetadata } from "@next-md-blog/core";
 import { composeSitemap } from "@next-md-blog/core";
 import { blog, glossary } from "@/next-md-blog.config";
 import { siteConfig } from "@/site.config";
@@ -6,6 +7,7 @@ import { LOCALES, DEFAULT_LOCALE, hreflangFor } from "@/lib/i18n";
 import { toAbsoluteUrl } from "@/lib/url";
 import { resolveHeroImage } from "@/lib/frontmatter";
 import { getPublishedAuthors } from "@/lib/authors";
+import { seriesHreflang } from "@/lib/series";
 
 /*
  * Google caps a single sitemap at 50,000 URLs / 50 MB. When you grow past
@@ -14,28 +16,105 @@ import { getPublishedAuthors } from "@/lib/authors";
  * /sitemap/<id>.xml.
  */
 
-/*
- * Indexable static routes only. /search and /sitemap (the HTML sitemap) are
- * `noindex, follow`, and a noindex URL in the XML sitemap is a contradictory
- * signal (Search Console flags it), so they stay out.
- */
-const STATIC_PATHS = ["", "/blog", "/glossary", "/authors"];
+type Entry = MetadataRoute.Sitemap[number];
 
+/**
+ * Newest `updated` / `date` across some docs. Used as `<lastmod>` for listing
+ * pages so it only moves when their content does — a lastmod that changes on
+ * every build teaches Google to ignore it site-wide.
+ */
+function newestDate(docs: ContentMetadata[]): Date | undefined {
+  let newest: number | undefined;
+  for (const d of docs) {
+    for (const key of ["date", "updated"] as const) {
+      const raw = d.frontmatter[key];
+      if (typeof raw !== "string") continue;
+      const t = new Date(raw).getTime();
+      if (!Number.isNaN(t) && (newest === undefined || t > newest)) newest = t;
+    }
+  }
+  return newest === undefined ? undefined : new Date(newest);
+}
+
+/** Collect every locale's docs of a collection once. */
+async function allDocs(
+  collection: typeof blog | typeof glossary,
+): Promise<ContentMetadata[]> {
+  const perLocale = await Promise.all(
+    LOCALES.map((locale) => collection.getAll({ locale })),
+  );
+  return perLocale.flat();
+}
+
+/*
+ * Indexable static routes only. /search, /sitemap (HTML), /blog/page/N and
+ * /blog/tags/* are `noindex, follow`, and a noindex URL in the XML sitemap is
+ * a contradictory signal (Search Console flags it), so they stay out.
+ */
 function staticEntry(
   path: string,
-  changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"] = "weekly",
-  priority = 0.7,
-): MetadataRoute.Sitemap[number] {
-  const url = `${siteConfig.url}/${DEFAULT_LOCALE}${path === "" ? "" : path}`;
+  opts: {
+    changeFrequency: Entry["changeFrequency"];
+    priority: number;
+    lastModified?: Date;
+  },
+): Entry {
   return {
-    url,
-    lastModified: new Date(),
-    changeFrequency,
-    priority,
-    alternates: {
-      languages: hreflangFor(siteConfig.url, path === "" ? "/" : path),
-    },
+    url: `${siteConfig.url}/${DEFAULT_LOCALE}${path}`,
+    ...(opts.lastModified ? { lastModified: opts.lastModified } : {}),
+    changeFrequency: opts.changeFrequency,
+    priority: opts.priority,
+    alternates: { languages: hreflangFor(siteConfig.url, path || "/") },
   };
+}
+
+/**
+ * Topic-cluster pillar pages (`/topics/<series>`), with hreflang limited to
+ * the locales that actually have posts in each series.
+ */
+async function topicEntries(): Promise<Entry[]> {
+  const slugs = await blog.getAllSeriesSlugs(LOCALES);
+  const out: Entry[] = [];
+  for (const slug of slugs) {
+    const languages = await seriesHreflang(slug);
+    const primary = languages["x-default"];
+    if (!primary) continue;
+    const posts = (
+      await Promise.all(LOCALES.map((locale) => blog.getBySeries(slug, { locale })))
+    ).flat();
+    const lastModified = newestDate(posts);
+    out.push({
+      url: primary,
+      ...(lastModified ? { lastModified } : {}),
+      changeFrequency: "weekly",
+      priority: 0.7,
+      alternates: { languages },
+    });
+  }
+  return out;
+}
+
+/**
+ * Google wants every language version listed as its own `<url>` (each with
+ * the full set of `xhtml:link` alternates, itself included). Collection and
+ * static entries arrive as one entry per page group keyed on the default
+ * locale; fan each out to one entry per locale URL.
+ */
+function expandLocales(entries: Entry[]): Entry[] {
+  const out: Entry[] = [];
+  const seen = new Set<string>();
+  for (const entry of entries) {
+    const languages = entry.alternates?.languages ?? {};
+    const urls = Object.entries(languages)
+      .filter(([lang]) => lang !== "x-default")
+      .map(([, url]) => url as string);
+    for (const url of urls.length ? urls : [entry.url]) {
+      if (seen.has(url)) continue;
+      seen.add(url);
+      out.push({ ...entry, url });
+    }
+  }
+  return out;
 }
 
 /**
@@ -77,13 +156,29 @@ async function buildImageMap(): Promise<Map<string, string>> {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const authorPaths = (await getPublishedAuthors()).map((a) => `/authors/${a.slug}`);
-  const staticEntries = [
-    ...STATIC_PATHS.map((p) =>
-      staticEntry(p, p === "" ? "daily" : "weekly", p === "" ? 1 : 0.7),
+  const [posts, terms, authors, topics] = await Promise.all([
+    allDocs(blog),
+    allDocs(glossary),
+    getPublishedAuthors(),
+    topicEntries(),
+  ]);
+  const lastPost = newestDate(posts);
+  const lastTerm = newestDate(terms);
+  const lastAny = [lastPost, lastTerm]
+    .filter((d): d is Date => !!d)
+    .sort((a, b) => b.getTime() - a.getTime())[0];
+
+  const staticEntries: Entry[] = [
+    staticEntry("", { changeFrequency: "daily", priority: 1, lastModified: lastAny }),
+    staticEntry("/blog", { changeFrequency: "weekly", priority: 0.7, lastModified: lastPost }),
+    staticEntry("/glossary", { changeFrequency: "weekly", priority: 0.7, lastModified: lastTerm }),
+    staticEntry("/authors", { changeFrequency: "monthly", priority: 0.5 }),
+    ...authors.map((a) =>
+      staticEntry(`/authors/${a.slug}`, { changeFrequency: "monthly", priority: 0.5 }),
     ),
-    ...authorPaths.map((p) => staticEntry(p, "monthly", 0.5)),
+    ...topics,
   ];
+
   const [entries, imageMap] = await Promise.all([
     composeSitemap({
       collections: [blog, glossary],
@@ -92,7 +187,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }),
     buildImageMap(),
   ]);
-  return entries.map((entry) => {
+  return expandLocales(entries).map((entry) => {
     const image = imageMap.get(entry.url);
     return image ? { ...entry, images: [image] } : entry;
   });

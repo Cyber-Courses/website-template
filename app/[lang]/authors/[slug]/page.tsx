@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { pageTitle } from "@/lib/metadata";
+import { pageTitle, socialMetadata } from "@/lib/metadata";
 import { notFound } from "next/navigation";
 import { ArrowUpRight } from "lucide-react";
 
@@ -49,12 +49,13 @@ export async function generateMetadata({
       canonical: url,
       languages: hreflangFor(siteConfig.url, `/authors/${slug}`),
     },
-    openGraph: {
-      type: "profile",
+    ...socialMetadata({
+      lang,
       url,
       title: author.name,
-      ...(author.bio ? { description: author.bio } : {}),
-    },
+      description: author.bio,
+      type: "profile",
+    }),
   };
 }
 

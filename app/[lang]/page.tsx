@@ -8,6 +8,7 @@ import { PostCard } from "@/components/post-card";
 import { blog } from "@/next-md-blog.config";
 import { siteConfig } from "@/site.config";
 import { LOCALES, hreflangFor, type Locale } from "@/lib/i18n";
+import { feedDiscoveryTypes, pageTitle, socialMetadata } from "@/lib/metadata";
 import { getDictionary, hasLocale } from "./dictionaries";
 
 type Params = { lang: string };
@@ -26,12 +27,21 @@ export async function generateMetadata({
   const dict = await getDictionary(lang);
   return {
     metadataBase: new URL(siteConfig.url),
-    title: dict.metadata.homeTitle,
+    // The layout's `%s | Site` template doesn't apply to the page in its own
+    // segment, so build the full title here.
+    title: pageTitle(dict.metadata.homeTitle),
     description: dict.metadata.homeDescription,
     alternates: {
       canonical: `${siteConfig.url}/${lang}`,
       languages: hreflangFor(siteConfig.url, "/"),
+      types: feedDiscoveryTypes(lang),
     },
+    ...socialMetadata({
+      lang,
+      url: `${siteConfig.url}/${lang}`,
+      title: siteConfig.name,
+      description: dict.metadata.homeDescription,
+    }),
   };
 }
 

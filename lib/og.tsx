@@ -3,6 +3,9 @@ import { join } from "node:path";
 import { ImageResponse } from "next/og";
 import { brand, logoMarkDataUri } from "@/lib/brand";
 import { siteConfig } from "@/site.config";
+import { ogSize } from "@/lib/og-size";
+
+export { ogSize };
 
 /**
  * Branded Open Graph / Twitter card renderer shared by every
@@ -10,7 +13,6 @@ import { siteConfig } from "@/site.config";
  * is Inter from `assets/fonts` (Satori can't use next/font). To restyle all
  * social cards at once, edit `OgCard` below.
  */
-export const ogSize = { width: 1200, height: 630 };
 
 const fontsPromise = Promise.all([
   readFile(join(process.cwd(), "assets/fonts/Inter-Regular.woff")),

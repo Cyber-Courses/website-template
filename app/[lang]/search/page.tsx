@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { pageTitle } from "@/lib/metadata";
+import { pageTitle, socialMetadata } from "@/lib/metadata";
 import { notFound } from "next/navigation";
 import { blog } from "@/next-md-blog.config";
 import { siteConfig } from "@/site.config";
@@ -28,6 +28,12 @@ export async function generateMetadata({
       canonical: `${siteConfig.url}/${lang}/search`,
       languages: hreflangFor(siteConfig.url, "/search"),
     },
+    ...socialMetadata({
+      lang,
+      url: `${siteConfig.url}/${lang}/search`,
+      title: dict.metadata.searchTitle,
+      description: dict.metadata.searchDescription,
+    }),
     // Internal search results are thin/duplicate content — keep them out of the
     // index but let crawlers follow through to the real pages.
     robots: { index: false, follow: true },

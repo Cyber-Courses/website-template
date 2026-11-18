@@ -4,6 +4,7 @@ import { siteConfig } from "@/site.config";
 import { LOCALES, DEFAULT_LOCALE, hreflangFor, type Locale } from "@/lib/i18n";
 import { toIsoDateTime } from "@/lib/schema-dates";
 import { oembedDiscoveryTypes } from "@/lib/oembed/resolve";
+import { ogSize } from "@/lib/og-size";
 
 /** Google truncates SERP titles around 60 characters. */
 export const MAX_TITLE_LENGTH = 60;
@@ -114,8 +115,54 @@ export function articleTwitterLabels(opts: {
 }
 
 /**
+ * Complete OpenGraph + Twitter blocks for a page under `[lang]`.
+ *
+ * Next.js replaces (does not merge) the layout's `openGraph` / `twitter`
+ * objects as soon as a page sets its own, and a page that sets neither inherits
+ * the layout's `og:url` / `og:title` (the homepage's). So every non-document
+ * page should return this: it re-adds site name, locale, the per-locale
+ * default share image (`app/[lang]/opengraph-image.tsx`) and a large Twitter
+ * card, with the page's own URL/title/description.
+ */
+export function socialMetadata(opts: {
+  lang: Locale;
+  url: string;
+  title: string;
+  description?: string;
+  type?: "website" | "profile";
+}): Pick<Metadata, "openGraph" | "twitter"> {
+  const { lang, url, title, description, type = "website" } = opts;
+  const image = {
+    url: `/${lang}/opengraph-image`,
+    width: ogSize.width,
+    height: ogSize.height,
+    alt: siteConfig.name,
+    type: "image/png",
+  };
+  return {
+    openGraph: {
+      type,
+      siteName: siteConfig.name,
+      url,
+      title,
+      ...(description ? { description } : {}),
+      locale: lang,
+      alternateLocale: LOCALES.filter((l) => l !== lang),
+      images: [image],
+    },
+    twitter: {
+      card: "summary_large_image",
+      site: siteConfig.twitter,
+      title,
+      ...(description ? { description } : {}),
+      images: [image],
+    },
+  };
+}
+
+/**
  * Metadata for a simple static page (privacy, terms, contact, …): canonical +
- * hreflang + a website-type OG block. `path` is the locale-less route (e.g.
+ * hreflang + full social tags. `path` is the locale-less route (e.g.
  * `/privacy`).
  */
 export function staticPageMetadata(opts: {
@@ -123,17 +170,21 @@ export function staticPageMetadata(opts: {
   path: string;
   title: string;
   description: string;
+  robots?: Metadata["robots"];
 }): Metadata {
   const url = `${siteConfig.url}/${opts.lang}${opts.path}`;
+  const description = clampDescription(opts.description);
   return {
     metadataBase: new URL(siteConfig.url),
     title: pageTitle(opts.title),
-    description: clampDescription(opts.description),
+    description,
     alternates: {
       canonical: url,
       languages: hreflangFor(siteConfig.url, opts.path),
+      types: feedDiscoveryTypes(opts.lang),
     },
-    openGraph: { type: "website", url, title: opts.title },
+    ...socialMetadata({ lang: opts.lang, url, title: opts.title, description }),
+    ...(opts.robots ? { robots: opts.robots } : {}),
   };
 }
 

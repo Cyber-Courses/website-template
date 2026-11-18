@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { pageTitle } from "@/lib/metadata";
+import { pageTitle, socialMetadata } from "@/lib/metadata";
 import { notFound } from "next/navigation";
 import { blog } from "@/next-md-blog.config";
 import { PostCard } from "@/components/post-card";
@@ -46,6 +46,12 @@ export async function generateMetadata({
       canonical: url,
       languages: hreflangFor(siteConfig.url, `/blog/page/${n}`),
     },
+    ...socialMetadata({
+      lang: locale,
+      url,
+      title: `${dict.metadata.blogTitle} — ${dict.blog.page} ${n}`,
+      description: dict.metadata.blogDescription,
+    }),
     // Paginated archives (page 2+) duplicate the post listing. Keep them
     // crawlable but out of the index so they don't compete with /blog.
     robots: { index: false, follow: true },

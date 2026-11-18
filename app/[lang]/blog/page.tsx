@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { pageTitle } from "@/lib/metadata";
+import { feedDiscoveryTypes, pageTitle, socialMetadata } from "@/lib/metadata";
 import { notFound } from "next/navigation";
 import { PostCard } from "@/components/post-card";
 import { Breadcrumbs } from "@/components/breadcrumbs";
@@ -39,7 +39,14 @@ export async function generateMetadata({
     alternates: {
       canonical: `${siteConfig.url}/${lang}/blog`,
       languages: hreflangFor(siteConfig.url, "/blog"),
+      types: feedDiscoveryTypes(lang),
     },
+    ...socialMetadata({
+      lang,
+      url: `${siteConfig.url}/${lang}/blog`,
+      title: dict.metadata.blogTitle,
+      description: dict.metadata.blogDescription,
+    }),
   };
 }
 

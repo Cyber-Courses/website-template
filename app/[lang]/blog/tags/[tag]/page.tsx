@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { clampDescription, pageTitle } from "@/lib/metadata";
+import { clampDescription, pageTitle, socialMetadata } from "@/lib/metadata";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PostCard } from "@/components/post-card";
@@ -39,14 +39,21 @@ export async function generateMetadata({
   const locale = lang;
   const dict = await getDictionary(locale);
   const decoded = decodeURIComponent(tag);
+  const url = `${siteConfig.url}/${lang}/blog/tags/${tag}`;
+  const title = `${dict.tag.title} "${decoded}"`;
+  const description = clampDescription(
+    `${dict.tag.title} ${decoded}. ${dict.metadata.blogDescription}`,
+  );
   return {
-    title: pageTitle(`${dict.tag.title} "${decoded}"`),
-    description: clampDescription(
-      `${dict.tag.title} ${decoded}. ${dict.metadata.blogDescription}`,
-    ),
-    alternates: {
-      canonical: `${siteConfig.url}/${lang}/blog/tags/${tag}`,
-    },
+    title: pageTitle(title),
+    description,
+    alternates: { canonical: url },
+    ...socialMetadata({ lang: locale, url, title, description }),
+    // Tag archives are thin, near-duplicate listings of posts that already
+    // have their own URLs (and topic pillars cover real clusters). Keep them
+    // crawlable for link discovery but out of the index — and therefore out
+    // of the XML sitemap. Drop this if you curate tags into real hub pages.
+    robots: { index: false, follow: true },
   };
 }
 

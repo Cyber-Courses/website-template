@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { pageTitle } from "@/lib/metadata";
+import { pageTitle, socialMetadata } from "@/lib/metadata";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { blog } from "@/next-md-blog.config";
@@ -31,6 +31,12 @@ export async function generateMetadata({
       canonical: `${siteConfig.url}/${lang}/sitemap`,
       languages: hreflangFor(siteConfig.url, "/sitemap"),
     },
+    ...socialMetadata({
+      lang,
+      url: `${siteConfig.url}/${lang}/sitemap`,
+      title: dict.metadata.sitemapTitle,
+      description: dict.metadata.sitemapDescription,
+    }),
   };
 }
 
