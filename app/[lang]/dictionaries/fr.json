@@ -37,7 +37,12 @@
     "noPosts": "Pas encore d’articles.",
     "previous": "Précédent",
     "next": "Suivant",
-    "page": "Page"
+    "page": "Page",
+    "faq": "Questions fréquentes",
+    "tools": "Outils",
+    "supplies": "Matériel nécessaire",
+    "totalTime": "Durée",
+    "result": "Résultat"
   },
   "tag": {
     "title": "Articles tagués",

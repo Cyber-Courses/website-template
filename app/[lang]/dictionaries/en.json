@@ -37,7 +37,12 @@
     "noPosts": "No posts yet.",
     "previous": "Previous",
     "next": "Next",
-    "page": "Page"
+    "page": "Page",
+    "faq": "Frequently asked questions",
+    "tools": "Tools",
+    "supplies": "You'll need",
+    "totalTime": "Time",
+    "result": "Result"
   },
   "tag": {
     "title": "Posts tagged",

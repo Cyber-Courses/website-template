@@ -5,6 +5,7 @@ import { LOCALES, DEFAULT_LOCALE, hreflangFor, type Locale } from "@/lib/i18n";
 import { toIsoDateTime } from "@/lib/schema-dates";
 import { oembedDiscoveryTypes } from "@/lib/oembed/resolve";
 import { ogSize } from "@/lib/og-size";
+import { getImageDims } from "@/lib/image-dims";
 
 /** Google truncates SERP titles around 60 characters. */
 export const MAX_TITLE_LENGTH = 60;
@@ -222,6 +223,32 @@ export async function buildDocumentMetadata(opts: {
     | undefined;
   if (og?.publishedTime) og.publishedTime = toIsoDateTime(og.publishedTime);
   if (og?.modifiedTime) og.modifiedTime = toIsoDateTime(og.modifiedTime);
+
+  // The collection hard-codes 1200×630 on the hero/OG image whatever its real
+  // size; platforms use these to lay out the card, so report the true size.
+  const ogImages = (meta.openGraph as { images?: unknown } | undefined)?.images;
+  if (Array.isArray(ogImages)) {
+    for (const img of ogImages) {
+      if (img && typeof img === "object" && typeof img.url === "string") {
+        // Own-site URLs are files in /public: read them from disk, not HTTP.
+        const src = img.url.startsWith(siteConfig.url)
+          ? img.url.slice(siteConfig.url.length)
+          : img.url;
+        Object.assign(img, await getImageDims(src));
+      }
+    }
+  }
+  if (meta.twitter && !(meta.twitter as { site?: string }).site) {
+    (meta.twitter as { site?: string }).site = siteConfig.twitter;
+  }
+  // No hero/OG image in frontmatter (e.g. glossary terms): fall back to the
+  // locale's default share card. A route-level `opengraph-image` file (blog
+  // posts) still takes precedence — file-based metadata overrides config.
+  if (!Array.isArray(ogImages) || ogImages.length === 0) {
+    const fallback = socialMetadata({ lang: locale, url, title: "" });
+    meta.openGraph = { ...meta.openGraph, images: fallback.openGraph?.images };
+    meta.twitter = { ...meta.twitter, images: fallback.twitter?.images };
+  }
 
   meta.robots = previewRobots(doc.frontmatter);
   meta.alternates = {

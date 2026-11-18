@@ -2,9 +2,18 @@
  * SEO audit — crawls the sitemap of a running site and asserts the invariants
  * that silently break rankings:
  *
- *   1. Every page has exactly one <link rel="canonical">.
- *   2. Every JSON-LD block parses and declares @context + @type.
+ *   1. Every page has exactly one <link rel="canonical">, pointing at itself.
+ *   2. Every JSON-LD block parses and declares @context + @type, and FAQPage /
+ *      HowTo markup describes text that is visible on the page.
  *   3. hreflang is reciprocal — if A points to B as an alternate, B points back.
+ *   4. Sitemap URLs are indexable: no noindex, a single robots meta tag.
+ *   5. On-page basics: one <title>, a meta description, exactly one <h1>,
+ *      og:image present and og:url matching the canonical.
+ *   6. Every indexable internal page linked from an audited page is in the
+ *      sitemap (orphaned from the sitemap = slower discovery).
+ *
+ * Warnings (reported, never fail the run): titles over 60 chars, descriptions
+ * outside 50–160 chars, titles/descriptions duplicated across pages.
  *
  * Usage:
  *   tsx scripts/seo-audit.ts [baseUrl]      # default http://localhost:3000
@@ -18,6 +27,47 @@ const MAX_PAGES = Number(process.env.SEO_AUDIT_MAX_PAGES ?? 60);
 
 type Finding = { url: string; rule: string; message: string };
 const errors: Finding[] = [];
+const warnings: Finding[] = [];
+
+/** Decode the handful of entities React/Next emit in attributes and text. */
+function decodeEntities(text: string): string {
+  return text
+    .replace(/&quot;/g, '"')
+    .replace(/&#x27;|&#39;|&apos;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&amp;/g, "&");
+}
+
+/** Page text a user can see: drop scripts/styles/tags, collapse whitespace. */
+function visibleText(html: string): string {
+  return decodeEntities(
+    html
+      .replace(/<script[\s\S]*?<\/script>/gi, " ")
+      .replace(/<style[\s\S]*?<\/style>/gi, " ")
+      .replace(/<[^>]+>/g, " "),
+  )
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function normalizeText(text: string): string {
+  return text.replace(/\s+/g, " ").trim();
+}
+
+/** Content of `<meta name|property="key" content="…">`. */
+function metaContent(html: string, key: string): string[] {
+  return matchAll(html, /<meta\s[^>]*>/gi)
+    .filter((tag) => {
+      const name = attr(tag, "name") ?? attr(tag, "property");
+      return name?.toLowerCase() === key;
+    })
+    .map((tag) => decodeEntities(attr(tag, "content") ?? ""));
+}
+
+const titles = new Map<string, string[]>();
+const descriptions = new Map<string, string[]>();
+const internalLinks = new Set<string>();
 
 /** Rewrite any URL onto the base origin so audits work on localhost/CI. */
 function onBase(rawUrl: string): string {
@@ -100,10 +150,72 @@ async function hreflangMapOf(url: string, html?: string): Promise<Record<string,
 async function auditPage(url: string): Promise<void> {
   const html = await getText(url);
 
-  // 1. Canonical.
+  // 1. Canonical: exactly one, self-referencing (a sitemap URL that
+  //    canonicalises elsewhere is a contradictory signal).
   const canonicals = matchAll(html, /<link[^>]+rel=["']canonical["'][^>]*>/gi);
   if (canonicals.length !== 1) {
     errors.push({ url, rule: "canonical", message: `expected 1 canonical, found ${canonicals.length}` });
+  }
+  const canonical = canonicals[0] && attr(canonicals[0], "href");
+  if (canonical && onBase(canonical) !== url) {
+    errors.push({ url, rule: "canonical", message: `canonical points elsewhere: ${canonical}` });
+  }
+
+  // 4. Robots: sitemap URLs must be indexable, with one unambiguous tag.
+  const robots = metaContent(html, "robots");
+  if (robots.length > 1) {
+    errors.push({ url, rule: "robots", message: `${robots.length} robots meta tags: ${robots.join(" / ")}` });
+  }
+  if (robots.some((r) => /noindex/i.test(r))) {
+    errors.push({ url, rule: "robots", message: "noindex page listed in the sitemap" });
+  }
+
+  // 5. On-page basics.
+  const titleTags = matchAll(html, /<title[^>]*>([\s\S]*?)<\/title>/gi).map((t) =>
+    normalizeText(decodeEntities(t)),
+  );
+  if (titleTags.length !== 1 || !titleTags[0]) {
+    errors.push({ url, rule: "title", message: `expected 1 non-empty <title>, found ${titleTags.length}` });
+  } else {
+    const title = titleTags[0];
+    if (title.length > 60) {
+      warnings.push({ url, rule: "title-length", message: `${title.length} chars (> 60): "${title}"` });
+    }
+    titles.set(title, [...(titles.get(title) ?? []), url]);
+  }
+  const description = metaContent(html, "description")[0];
+  if (!description) {
+    errors.push({ url, rule: "description", message: "missing meta description" });
+  } else {
+    if (description.length < 50 || description.length > 160) {
+      warnings.push({
+        url,
+        rule: "description-length",
+        message: `${description.length} chars (want 50–160)`,
+      });
+    }
+    descriptions.set(description, [...(descriptions.get(description) ?? []), url]);
+  }
+  const h1s = matchAll(html, /<h1[\s>]/gi).length;
+  if (h1s !== 1) {
+    errors.push({ url, rule: "h1", message: `expected 1 <h1>, found ${h1s}` });
+  }
+  if (metaContent(html, "og:image").length === 0) {
+    errors.push({ url, rule: "og", message: "missing og:image" });
+  }
+  const ogUrl = metaContent(html, "og:url")[0];
+  if (canonical && ogUrl && onBase(ogUrl) !== onBase(canonical)) {
+    errors.push({ url, rule: "og", message: `og:url ${ogUrl} ≠ canonical ${canonical}` });
+  }
+
+  // Collect same-origin, locale-prefixed page links for the orphan check.
+  for (const tag of matchAll(html, /<a\s[^>]*href=["'][^"']+["'][^>]*>/gi)) {
+    const href = attr(tag, "href");
+    if (!href || !href.startsWith("/") || href.startsWith("//")) continue;
+    const path = href.split(/[?#]/)[0].replace(/\/$/, "");
+    if (/^\/[a-z]{2}(\/|$)/.test(path) && !/\.[a-z0-9]+$/i.test(path)) {
+      internalLinks.add(`${BASE}${path}`);
+    }
   }
 
   // 2. JSON-LD validity.
@@ -111,6 +223,7 @@ async function auditPage(url: string): Promise<void> {
     html,
     /<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi,
   );
+  const visible = visibleText(html);
   for (const block of blocks) {
     try {
       const json = JSON.parse(block);
@@ -118,6 +231,23 @@ async function auditPage(url: string): Promise<void> {
       for (const node of [nodes].flat()) {
         if (!node["@type"]) {
           errors.push({ url, rule: "jsonld", message: "JSON-LD node missing @type" });
+        }
+        // Google requires FAQPage / HowTo markup to match visible content.
+        const mustBeVisible: string[] = [];
+        if (node["@type"] === "FAQPage") {
+          for (const q of node.mainEntity ?? []) if (q?.name) mustBeVisible.push(q.name);
+        }
+        if (node["@type"] === "HowTo") {
+          for (const step of node.step ?? []) if (step?.text) mustBeVisible.push(step.text);
+        }
+        for (const text of mustBeVisible) {
+          if (!visible.includes(normalizeText(text))) {
+            errors.push({
+              url,
+              rule: "jsonld-visible",
+              message: `${node["@type"]} text not visible on page: "${text.slice(0, 60)}"`,
+            });
+          }
         }
       }
     } catch {
@@ -163,8 +293,44 @@ async function main() {
     }
   }
 
+  // 6. Indexable internal pages missing from the sitemap. Only judged when
+  //    the whole sitemap was audited (otherwise "missing" is meaningless).
+  if (all.length === urls.length) {
+    const inSitemap = new Set(all);
+    for (const link of internalLinks) {
+      if (inSitemap.has(link)) continue;
+      try {
+        const res = await fetch(link, { redirect: "manual" });
+        if (res.status !== 200) continue;
+        const robots = metaContent(await res.text(), "robots");
+        if (!robots.some((r) => /noindex/i.test(r))) {
+          errors.push({ url: link, rule: "sitemap-missing", message: "indexable page linked internally but not in the sitemap" });
+        }
+      } catch (e) {
+        errors.push({ url: link, rule: "fetch", message: (e as Error).message });
+      }
+    }
+  }
+
+  for (const [map, rule] of [
+    [titles, "duplicate-title"],
+    [descriptions, "duplicate-description"],
+  ] as const) {
+    for (const [text, pages] of map) {
+      // Pages that are hreflang alternates of each other are translations
+      // (a term like "hreflang" or a name is legitimately identical).
+      const translations = pages.every((a) =>
+        pages.every((b) => a === b || Object.values(hreflangCache.get(a) ?? {}).includes(b)),
+      );
+      if (pages.length > 1 && !translations) {
+        warnings.push({ url: pages.join(", "), rule, message: `"${text.slice(0, 80)}"` });
+      }
+    }
+  }
+
+  for (const w of warnings) console.warn(`  ! ${w.url}\n    [${w.rule}] ${w.message}`);
   if (errors.length === 0) {
-    console.log(`✓ no SEO issues across ${urls.length} pages`);
+    console.log(`✓ no SEO errors across ${urls.length} pages (${warnings.length} warning(s))`);
     process.exit(0);
   }
   for (const e of errors) console.error(`  ✗ ${e.url}\n    [${e.rule}] ${e.message}`);

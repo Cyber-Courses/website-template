@@ -177,6 +177,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       staticEntry(`/authors/${a.slug}`, { changeFrequency: "monthly", priority: 0.5 }),
     ),
     ...topics,
+    // Trust pages: indexable and linked from every footer, so list them.
+    ...["/contact", "/privacy", "/terms"].map((p) =>
+      staticEntry(p, { changeFrequency: "yearly", priority: 0.3 }),
+    ),
   ];
 
   const [entries, imageMap] = await Promise.all([

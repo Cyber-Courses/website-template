@@ -52,6 +52,11 @@ export type Dictionary = {
     previous: string;
     next: string;
     page: string;
+    faq: string;
+    tools: string;
+    supplies: string;
+    totalTime: string;
+    result: string;
   };
   tag: { title: string; back: string };
   search: { placeholder: string; noResults: string };

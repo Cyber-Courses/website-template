@@ -47,9 +47,10 @@ const COPY: Record<Locale, { heading: string; description: string; home: string 
     },
   };
 
+// No `robots` here: Next.js injects `<meta name="robots" content="noindex">`
+// on every 404 itself, and setting it again emitted a second, conflicting tag.
 export const metadata: Metadata = {
   title: `${COPY[DEFAULT_LOCALE].heading} | ${siteConfig.name}`,
-  robots: { index: false, follow: false },
 };
 
 export default function RootNotFound() {

@@ -37,7 +37,12 @@
     "noPosts": "Noch keine Beiträge.",
     "previous": "Zurück",
     "next": "Weiter",
-    "page": "Seite"
+    "page": "Seite",
+    "faq": "Häufig gestellte Fragen",
+    "tools": "Werkzeuge",
+    "supplies": "Du brauchst",
+    "totalTime": "Dauer",
+    "result": "Ergebnis"
   },
   "tag": {
     "title": "Beiträge mit Tag",

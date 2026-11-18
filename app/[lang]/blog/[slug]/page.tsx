@@ -4,7 +4,13 @@ import Link from "next/link";
 import Image from "next/image";
 import { cache } from "react";
 import rehypeSlug from "rehype-slug";
-import { MarkdownContent, authorNamesFromFrontmatter } from "@next-md-blog/core";
+import {
+  MarkdownContent,
+  authorNamesFromFrontmatter,
+  type FaqItem,
+  type HowToFrontmatter,
+} from "@next-md-blog/core";
+import { PostFaq, PostHowTo } from "@/components/post-structured-content";
 import { AuthorAvatar } from "@/components/author-avatar";
 import { authorHref, resolveAuthorByName } from "@/lib/authors";
 
@@ -122,6 +128,10 @@ export default async function BlogPostPage({
       { locale, speakable: true },
     ),
   );
+
+  const faq = Array.isArray(fm.faq) ? (fm.faq as FaqItem[]) : [];
+  const howto =
+    fm.howto && typeof fm.howto === "object" ? (fm.howto as HowToFrontmatter) : null;
 
   const heroImage = resolveHeroImage(fm);
   // Real dimensions for the hero so it reserves space (CLS = 0).
@@ -251,6 +261,11 @@ export default async function BlogPostPage({
                 rehypePlugins={[rehypeSlug]}
               />
             </div>
+            {/* Visible counterparts of the FAQPage / HowTo JSON-LD. */}
+            {howto && (
+              <PostHowTo howto={howto} fallbackName={title} labels={dict.blog} />
+            )}
+            {faq.length > 0 && <PostFaq faq={faq} labels={dict.blog} />}
           </article>
 
           <aside className="hidden lg:block">

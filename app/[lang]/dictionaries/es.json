@@ -37,7 +37,12 @@
     "noPosts": "Aún no hay artículos.",
     "previous": "Anterior",
     "next": "Siguiente",
-    "page": "Página"
+    "page": "Página",
+    "faq": "Preguntas frecuentes",
+    "tools": "Herramientas",
+    "supplies": "Necesitarás",
+    "totalTime": "Duración",
+    "result": "Resultado"
   },
   "tag": {
     "title": "Artículos etiquetados",
