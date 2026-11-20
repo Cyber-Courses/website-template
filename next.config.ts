@@ -35,9 +35,12 @@ const csp = {
     "https://www.googletagmanager.com",
   ],
   "style-src": ["'self'", "'unsafe-inline'"],
+  // Hero and Markdown images come through /_next/image (this origin). `https:` is
+  // for what the browser loads itself: oEmbed photos and link-card thumbnails
+  // (components/markdown/embed.tsx). A site without those embeds drops it.
   "img-src": ["'self'", "data:", "blob:", "https:"],
   "font-src": ["'self'", "data:"],
-  "media-src": ["'self'", "https:"],
+  "media-src": ["'self'"],
   "manifest-src": ["'self'"],
   "worker-src": ["'self'", "blob:"],
   "connect-src": [
@@ -138,7 +141,12 @@ const nextConfig: NextConfig = {
   },
   images: {
     formats: ["image/avif", "image/webp"],
-    remotePatterns: [{ protocol: "https", hostname: "**" }],
+    // Only the hosts content images come from: here the sample posts' Unsplash
+    // photos. Never `hostname: "**"`, which makes /_next/image a proxy for any
+    // host. A site without remote images sets `remotePatterns: []`.
+    remotePatterns: [
+      { protocol: "https", hostname: "images.unsplash.com", pathname: "/photo-*" },
+    ],
   },
   async headers() {
     return [{ source: "/(.*)", headers: securityHeaders }];

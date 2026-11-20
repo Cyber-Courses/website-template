@@ -16,8 +16,6 @@ export function ResourceHints() {
   if (provider && ANALYTICS_HOSTS[provider]) {
     for (const h of ANALYTICS_HOSTS[provider]) hosts.add(h);
   }
-  // Common image CDN for sample posts; extend per project.
-  hosts.add("https://images.unsplash.com");
   return (
     <>
       {[...hosts].map((href) => (
